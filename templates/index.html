@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html>
+<head>
+<link rel="stylesheet" type="text/css" href="/static/style.css">
+</head>
+<body>
+
+<div id="formAndText">
+  <div style="display:flex; flex-wrap:wrap; align-items:center; justify-content: space-between; gap: 20px; padding: 20px;">
+    <div style="flex: 1 0 auto;">
+      <label for="wpm">Words per minute:</label>
+      <input type="number" id="wpm" value="300">
+    </div>
+    <div style="flex: 1 0 auto;">
+      <label for="num_words">Number of words to display:</label>
+      <input type="number" id="num_words" value="1">
+    </div>
+    <div style="flex: 1 0 auto;">
+      <label for="font_size">Font size:</label>
+      <input type="number" id="font_size" value="32">
+    </div>
+  </div>
+  <p id="fulltextdisplay"></p>
+</div>
+
+<p id="rsvp"></p>
+<input type="button" id="playPause"  value="Play"><br/>
+
+<script src="/static/main.js"></script>
+
+</body>
+</html>

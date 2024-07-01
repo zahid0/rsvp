@@ -1,71 +1,33 @@
-<!DOCTYPE html>
-<html>
-<head>
-<style>
-    #rsvp, #fulltextdisplay {
-        position: absolute;
-        left: 50%;
-        top: 50%;
-        transform: translate(-50%, -50%);
-    }
-  .highlight {
-    background-color: yellow;
-    font-weight: bold;
-    /* add any other styling you want for the highlighted word */
-  }
-</style>
-</head>
-<body>
-
-<div id="formAndText">
-  <form>
-    Words per minute: <input type="number" id="wpm" value="300"><br>
-    Number of words to display: <input type="number" id="num_words" value="1">
-    Font size: <input type="number" id="font_size" value="32"><br>
-  </form>
-  <div id="fulltext" style="display:none;">This is a demo text for RSVP effect at a web based application.</div>
-  <p id="fulltextdisplay"></p>
-</div>
-<p id="rsvp"></p>
-
-<button id="playPause">Play</button>
-
-<script>
-// replace this text with the content of your text file. Remove \n for inline text
-var data = document.getElementById("fulltext").innerText;
-var words = data.split(' ');
-var rsvpElement = document.getElementById("rsvp");
-var playPauseButton = document.getElementById("playPause");
-var intervalId = null; // to keep track of the interval
-var dynIndex = 0; // to keep track of the current word being displayed
-var numWords = 1;
-var playing = false; // initially paused
-
 function setupWordDisplay() {
   let fulltextdisplay = document.getElementById("fulltextdisplay");
   fulltextdisplay.innerHTML = ""; // clear previous content
 
   for(let i = 0; i < words.length; i++) {
-    let word = document.createElement('span');
-    word.textContent = words[i];
-    if(i === dynIndex) {
-      word.classList.add('highlight'); // initially highlight the word at dynIndex
+    if (words[i] === "<br>") {
+      fulltextdisplay.appendChild(document.createElement('br'));
     }
-    word.style.marginRight = "5px";
+    else {
+      let word = document.createElement('span');
+      word.innerHTML = words[i];
+      if(i === dynIndex) {
+        word.classList.add('highlight'); // initially highlight the word at dynIndex
+      }
+      word.style.marginRight = "5px";
 
-    word.onclick = function() {
-      fulltextdisplay.childNodes[dynIndex].classList.remove('highlight');
-      dynIndex = i;
-      word.classList.add('highlight');
-    };
+      word.onclick = function() {
+        fulltextdisplay.childNodes[dynIndex].classList.remove('highlight');
+        dynIndex = i;
+        word.classList.add('highlight');
+      };
 
-    fulltextdisplay.appendChild(word);
+      fulltextdisplay.appendChild(word);
+    }
   }
 }
 
 function displayWords() {
   var displayChunk = words.slice(dynIndex, dynIndex + numWords).join(' ');
-  rsvpElement.textContent = displayChunk;
+  rsvpElement.innerHTML = displayChunk;
   dynIndex = (dynIndex + numWords);
 
   // Check if all words have been displayed
@@ -106,7 +68,7 @@ function togglePlayPause() {
 function playRsvp() {
   init_rsvp();
   playing = true;
-  playPauseButton.innerText = "Pause";
+  playPauseButton.value = "Pause";
   updateDisplay();
 }
 
@@ -115,7 +77,7 @@ function pauseRsvp() {
   clearInterval(intervalId);
   intervalId = null;
   playing = false;
-  playPauseButton.innerText = "Play";
+  playPauseButton.value = "Play";
   rsvpElement.textContent = "";
   updateDisplay();
   setupWordDisplay();
@@ -129,11 +91,24 @@ document.addEventListener("keypress", function(event) {
   }
 });
 
+
+var rsvpElement = document.getElementById("rsvp");
+var playPauseButton = document.getElementById("playPause");
+var intervalId = null; // to keep track of the interval
+var dynIndex = 0; // to keep track of the current word being displayed
+var numWords = 1;
+var playing = false; // initially paused
+var words;
+
 playPauseButton.addEventListener("click", togglePlayPause);
-updateDisplay();
-setupWordDisplay();
 
-</script>
+fetch('/content')
+  .then(response => response.json())
+  .then(data => {
+    words = data.content;
+    updateDisplay();
+    setupWordDisplay();
+  })
+  .catch(error => console.error('Error:', error));
 
-</body>
-</html>
+

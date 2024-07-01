@@ -1,0 +1,66 @@
+#rsvp {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+}
+
+#playPause {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  bottom: 20px;"
+}
+.highlight {
+  background-color: yellow;
+  font-weight: bold;
+  /* add any other styling you want for the highlighted word */
+}
+#formAndText {
+  text-align: center;
+  padding: 50px;
+  background-color: #f8f9fa;
+  border-radius: 8px;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+}
+
+form {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+label {
+  font-size: 18px;
+}
+
+input[type="number"],
+input[type="button"] {
+  padding: 10px;
+  font-size: 16px;
+  border: 1px solid #ced4da;
+  border-radius: 4px;
+}
+
+input[type="button"] {
+  background-color: #007bff;
+  color: #fff;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+input[type="button"]:hover {
+  background-color: #0056b3;
+}
+
+#fulltextdisplay {
+   overflow: auto;
+   border: 1px solid #000;
+   text-align: left;
+   width: 100%;
+   max-height: 400px;
+   box-sizing: border-box;
+}
+#fulltextdisplay span {
+   display: inline-block;
+}
