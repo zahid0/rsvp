@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html>
+<body>
+
+<p id="rsvp">Loading...</p>
+
+<form>
+  Words per minute: <input type="number" id="wpm" value="300"><br>
+  Number of words to display: <input type="number" id="num_words" value="1">
+</form>
+
+<script>
+// replace this text with the content of your text file. Remove \n for inline text
+var data = "This is a demo text for RSVP effect at a web based application.";
+var words = data.split(' ');
+var rsvpElement = document.getElementById("rsvp");
+
+function rsvp() {
+  var wpm = document.getElementById("wpm").value;
+  var numWords = document.getElementById("num_words").value;
+  var wordsPerSecond = wpm / 60;
+  var interval = 1 / wordsPerSecond * numWords;
+
+  var i = 0;
+  setInterval(function() {
+    var displayChunk = words.slice(i, i + numWords).join(' ');
+    rsvpElement.textContent = displayChunk;
+    i = (i + numWords) % words.length;
+  }, interval * 1000);
+}
+
+rsvp();
+</script>
+
+</body>
+</html>
