@@ -9,27 +9,74 @@
   Number of words to display: <input type="number" id="num_words" value="1">
 </form>
 
+<button id="play">Play</button>
+<button id="pause">Pause</button>
+
 <script>
 // replace this text with the content of your text file. Remove \n for inline text
 var data = "This is a demo text for RSVP effect at a web based application.";
 var words = data.split(' ');
 var rsvpElement = document.getElementById("rsvp");
+var playButton = document.getElementById("play");
+var pauseButton = document.getElementById("pause");
+var intervalId = null; // to keep track of the interval
+var dynIndex = 0; // to keep track of the current word being displayed
+var playing = false; // initially paused
 
-function rsvp() {
+// Init rsvp function
+function init_rsvp() {
   var wpm = document.getElementById("wpm").value;
   var numWords = document.getElementById("num_words").value;
   var wordsPerSecond = wpm / 60;
   var interval = 1 / wordsPerSecond * numWords;
-
-  var i = 0;
-  setInterval(function() {
-    var displayChunk = words.slice(i, i + numWords).join(' ');
+  // Set the interval for updating the rsvp text
+  intervalId = setInterval(function() {
+    var displayChunk = words.slice(dynIndex, dynIndex + numWords).join(' ');
     rsvpElement.textContent = displayChunk;
-    i = (i + numWords) % words.length;
+    dynIndex = (dynIndex + numWords) % words.length;
   }, interval * 1000);
 }
 
-rsvp();
+// Toggles playing state and calls the necessary functions accordingly
+function togglePlay() {
+  if(playing) {
+    pauseRsvp();
+  } else {
+    playRsvp();
+  }
+}
+
+// Plays the rsvp effect. Init it if not initialized yet
+function playRsvp() {
+  if(!intervalId) {
+    init_rsvp();
+  } else {
+    // Resume the interval
+    init_rsvp();
+  }
+  playing = true;
+}
+
+// Stops the rsvp effect
+function pauseRsvp() {
+  clearInterval(intervalId);
+  intervalId = null;
+  playing = false;
+}
+
+// Plays or pauses the rsvp effect when spacebar is pressed
+document.addEventListener("keypress", function(event) {
+  if(event.key === " ") {
+    togglePlay();
+  }
+});
+
+// Assign the play and pause functions to the play and pause buttons, respectively
+playButton.addEventListener("click", playRsvp);
+pauseButton.addEventListener("click", pauseRsvp);
+
+// Initially pauses the rsvp effect
+pauseRsvp();
 </script>
 
 </body>
