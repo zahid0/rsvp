@@ -21,12 +21,12 @@ templates = Jinja2Templates(directory="templates")
 
 
 @app.get("/")
-def home():
+async def home():
     return FileResponse("templates/index.html")
 
 
 @app.get("/content")
-def content():
+async def content():
     with open("files/data.txt", "r") as file:
         content = file.read().replace("\n", " <br> ")
     return {"content": content.split()}
