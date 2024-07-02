@@ -1,114 +1,91 @@
-function setupWordDisplay() {
-  let fulltextdisplay = document.getElementById("fulltextdisplay");
-  fulltextdisplay.innerHTML = ""; // clear previous content
+function rsvpApp() {
+  return {
+    wpm: 300,
+    numWords: 5,
+    fontSize: 64,
+    words: [],
+    dynIndex: 0,
+    intervalId: null,
+    playing: false,
+    fullTextDisplay: '',
+    rsvpText: '',
 
-  for(let i = 0; i < words.length; i++) {
-    if (words[i] === "<br>") {
-      fulltextdisplay.appendChild(document.createElement('br'));
-    }
-    else {
-      let word = document.createElement('span');
-      word.innerHTML = words[i];
-      if(i === dynIndex) {
-        word.classList.add('highlight'); // initially highlight the word at dynIndex
+    init() {
+      this.fetchWords();
+    },
+
+    async fetchWords() {
+      try {
+        const response = await fetch('/content');
+        const data = await response.json();
+        this.words = data.content;
+        this.setupWordDisplay();
+      } catch (error) {
+        console.error('Error fetching content:', error);
       }
-      word.style.marginRight = "5px";
+    },
 
-      word.onclick = function() {
-        fulltextdisplay.childNodes[dynIndex].classList.remove('highlight');
-        dynIndex = i;
-        word.classList.add('highlight');
-      };
+    setupWordDisplay() {
+      let fulltextdisplay = '';
+      for (let i = 0; i < this.words.length; i++) {
+        if (this.words[i] === "<br>") {
+          fulltextdisplay += '<br>';
+        } else {
+          let span = `<span style="margin-right: 5px;" @click="highlightWord(${i})" class="${i === this.dynIndex ? 'highlight' : ''}">${this.words[i]}</span>`;
+          fulltextdisplay += span;
+        }
+      }
+      this.fullTextDisplay = fulltextdisplay;
+    },
 
-      fulltextdisplay.appendChild(word);
+    highlightWord(index) {
+      this.dynIndex = index;
+      this.setupWordDisplay();
+    },
+
+    displayWords() {
+      const endIdx = this.dynIndex + this.numWords;
+      this.rsvpText = this.words.slice(this.dynIndex, endIdx).join(' ');
+      this.dynIndex = endIdx >= this.words.length ? 0 : endIdx;
+
+      if (this.dynIndex === 0) {
+        this.pauseRsvp();
+      }
+    },
+
+    initRsvp() {
+      const wordsPerSecond = this.wpm / 60;
+      const interval = 1000 / wordsPerSecond * this.numWords;
+      document.getElementById('rsvp').style.fontSize = `${this.fontSize}px`;
+      this.intervalId = setInterval(() => this.displayWords(), interval);
+    },
+
+    updateDisplay() {
+      document.getElementById("formAndText").style.display = this.playing ? "none" : "block";
+      document.getElementById("rsvp").style.display = this.playing ? "block" : "none";
+    },
+
+    togglePlayPause() {
+      if (this.playing) {
+        this.pauseRsvp();
+      } else {
+        this.playRsvp();
+      }
+    },
+
+    playRsvp() {
+      this.initRsvp();
+      this.playing = true;
+      this.updateDisplay();
+    },
+
+    pauseRsvp() {
+      clearInterval(this.intervalId);
+      this.intervalId = null;
+      this.playing = false;
+      this.rsvpText = "";
+      this.updateDisplay();
+      this.setupWordDisplay();
     }
   }
 }
-
-function displayWords() {
-  var displayChunk = words.slice(dynIndex, dynIndex + numWords).join(' ');
-  rsvpElement.innerHTML = displayChunk;
-  dynIndex = (dynIndex + numWords);
-
-  // Check if all words have been displayed
-  if (dynIndex >  words.length) {
-    dynIndex = 0;
-    pauseRsvp();
-  }
-}
-
-// Init rsvp function
-function init_rsvp() {
-  var wpm = Number(document.getElementById("wpm").value);
-  numWords = Number(document.getElementById("num_words").value);
-  var wordsPerSecond = wpm / 60;
-  var interval = 1000 / wordsPerSecond * numWords;
-  var fontSize = document.getElementById("font_size").value;
-  rsvpElement.style.fontSize = fontSize + 'px'; // add input field to provide font size
-  // Set the interval for updating the rsvp text
-  intervalId = setInterval(displayWords, interval);
-}
-
-function updateDisplay() {
-  document.getElementById("formAndText").style.display = playing ? "none" : "block";
-  document.getElementById("rsvp").style.display = playing ? "block" : "none";
-}
-
-// Function to toggle play/pause
-function togglePlayPause() {
-  if(playing) {
-    pauseRsvp();
-  } else {
-    playRsvp();
-  }
-}
-
-
-// Plays the rsvp effect. Init it if not initialized yet
-function playRsvp() {
-  init_rsvp();
-  playing = true;
-  playPauseButton.value = "Pause";
-  updateDisplay();
-}
-
-// Stops the rsvp effect
-function pauseRsvp() {
-  clearInterval(intervalId);
-  intervalId = null;
-  playing = false;
-  playPauseButton.value = "Play";
-  rsvpElement.textContent = "";
-  updateDisplay();
-  setupWordDisplay();
-}
-
-// Plays or pauses the rsvp effect when spacebar is pressed
-document.addEventListener("keypress", function(event) {
-  if(event.key === " ") {
-    event.preventDefault(); // prevent form from being submitted
-    togglePlayPause();
-  }
-});
-
-
-var rsvpElement = document.getElementById("rsvp");
-var playPauseButton = document.getElementById("playPause");
-var intervalId = null; // to keep track of the interval
-var dynIndex = 0; // to keep track of the current word being displayed
-var numWords = 1;
-var playing = false; // initially paused
-var words;
-
-playPauseButton.addEventListener("click", togglePlayPause);
-
-fetch('/content')
-  .then(response => response.json())
-  .then(data => {
-    words = data.content;
-    updateDisplay();
-    setupWordDisplay();
-  })
-  .catch(error => console.error('Error:', error));
-
-

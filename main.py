@@ -16,6 +16,6 @@ def home():
 
 @app.get('/content')
 def content():
-    with open('data.txt', 'r') as file:
+    with open('files/data.txt', 'r') as file:
         content = file.read().replace('\n', ' <br> ')
     return {'content': content.split()}

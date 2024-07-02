@@ -9,13 +9,15 @@
   position: absolute;
   left: 50%;
   transform: translateX(-50%);
-  bottom: 20px;"
+  bottom: 20px;
 }
+
 .highlight {
   background-color: yellow;
   font-weight: bold;
   /* add any other styling you want for the highlighted word */
 }
+
 #formAndText {
   text-align: center;
   padding: 50px;
@@ -54,13 +56,14 @@ input[type="button"]:hover {
 }
 
 #fulltextdisplay {
-   overflow: auto;
-   border: 1px solid #000;
-   text-align: left;
-   width: 100%;
-   max-height: 400px;
-   box-sizing: border-box;
+  overflow: auto;
+  border: 1px solid #000;
+  text-align: left;
+  width: 100%;
+  max-height: 400px;
+  box-sizing: border-box;
 }
+
 #fulltextdisplay span {
-   display: inline-block;
+  display: inline-block;
 }

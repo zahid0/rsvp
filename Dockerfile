@@ -1,6 +1,9 @@
 FROM python:3.12
 WORKDIR /app
-COPY . /app
+
+COPY ./requirements.txt /app/requirements.txt
 RUN pip install -r requirements.txt
 
-CMD "uvicorn main:app"
+COPY . /app
+
+CMD ["uvicorn", "main:app", "--host=0.0.0.0"]
