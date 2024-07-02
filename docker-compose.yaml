@@ -3,6 +3,16 @@ services:
     build:
       context: .
     volumes:
-      - ./files:/app/files
+      - .:/app
+    # command: uvicorn main:app --host=0.0.0.0 --reload
+    command: sleep infinity
     ports:
       - 8000:8000
+    environment:
+      - DATABASE_URL=postgresql+asyncpg://rsvp:r2d2@postgres/rsvp
+  postgres:
+    image: postgres
+    environment:
+      - POSTGRES_PASSWORD=r2d2
+      - POSTGRES_DB=rsvp
+      - POSTGRES_USER=rsvp
