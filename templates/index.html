@@ -1,33 +1,78 @@
-<!DOCTYPE html>
-<html>
+<!-- index.htmlx -->
+
+<!DOCTYPE htmlx>
+<html lang="en">
 <head>
-  <link rel="stylesheet" type="text/css" href="/static/style.css">
-  <script src="https://unpkg.com/alpinejs" defer></script>
-  <script src="https://unpkg.com/htmx.org@2.0.0"></script>
-  <script src="/static/main.js"></script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document Listing</title>
+    <link rel="stylesheet" type="text/css" href="/static/index.css">
+    <script src="https://unpkg.com/htmx.org@2.0.0"></script>
+    <script src="https://unpkg.com/alpinejs" defer></script>
 </head>
-<body x-data="rsvpApp()" x-init="init" x-on:keydown.space="togglePlayPause">
+<body class="bg-gray-100">
+    <div x-data="{
+        documents: [],
+        showAddForm: false,
+        newDocument: { path: '' },
+        fetchDocuments: async function() {
+            let response = await fetch('/api/documents');
+            this.documents = await response.json();
+        },
+        addDocument: async function() {
+            let response = await fetch('/api/documents', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(this.newDocument)
+            });
+            if (response.ok) {
+                this.newDocument = {  path: '' };
+                this.showAddForm = false;
+                this.fetchDocuments();
+            }
+        }
+    }" x-init="fetchDocuments()">
+        <!-- Header -->
+        <header class="flex justify-between items-center px-4 py-2 bg-white shadow">
+            <h1 class="text-xl font-semibold">Document Listing</h1>
+            <button @click="showAddForm = true" class="px-4 py-2 bg-blue-500 text-white rounded">Add New Document</button>
+        </header>
 
-<div id="formAndText">
-  <div style="display:flex; flex-wrap:wrap; align-items:center; justify-content: space-between; gap: 20px; padding: 20px;">
-    <div style="flex: 1 0 auto;">
-      <label for="wpm">Words per minute:</label>
-      <input type="number" id="wpm" x-model.number="wpm">
-    </div>
-    <div style="flex: 1 0 auto;">
-      <label for="num_words">Number of words to display:</label>
-      <input type="number" id="num_words" x-model.number="numWords">
-    </div>
-    <div style="flex: 1 0 auto;">
-      <label for="font_size">Font size:</label>
-      <input type="number" id="font_size" x-model.number="fontSize">
-    </div>
-  </div>
-  <p id="fulltextdisplay" x-html="fullTextDisplay"></p>
-</div>
+        <!-- Add Document Form -->
+        <div x-show="showAddForm" class="fixed inset-0 flex items-center justify-center bg-gray-700 bg-opacity-50">
+            <div class="bg-white p-6 rounded shadow-lg">
+                <h2 class="text-lg font-semibold mb-4">Add New Document</h2>
+                <form @submit.prevent="addDocument()">
+                    <div class="mb-4">
+                        <label for="new-path" class="block text-sm font-medium text-gray-700">Path:</label>
+                        <input type="text" id="new-path" x-model="newDocument.path" class="mt-1 block w-full px-3 py-2 border rounded-md">
+                    </div>
+                    <div class="mt-4 flex justify-end">
+                        <button type="submit" class="px-4 py-2 bg-blue-500 text-white rounded">Add Document</button>
+                        <button @click="showAddForm = false" class="ml-2 px-4 py-2 bg-gray-300 rounded">Cancel</button>
+                    </div>
+                </form>
+            </div>
+        </div>
 
-<p id="rsvp" x-html="rsvpText"></p>
-<input type="button" id="playPause" :value="playing ? 'Pause' : 'Play'" @click="togglePlayPause" x-on:keydown.space.prevent><br/>
-
+        <!-- Document List -->
+        <main class="max-w-4xl mx-auto mt-8">
+            <ul class="divide-y divide-gray-200">
+                <template x-for="document in documents" :key="document.id">
+                    <li class="py-4 flex items-center justify-between">
+                        <div class="flex items-center">
+                            <span class="font-semibold text-gray-900 mr-2" x-text="document.id"></span>
+                            <span class="text-gray-600" x-text="document.path"></span>
+                        </div>
+                        <div>
+                            <a :href="'/detail/' + document.id" class="text-blue-500">View Details</a>
+                        </div>
+                    </li>
+                </template>
+            </ul>
+        </main>
+    </div>
 </body>
-</html>
+</htmlx>

@@ -1,7 +1,7 @@
 from pydantic import BaseModel
 
 
-class Entry(BaseModel):
+class Document(BaseModel):
     id: int
     path: str
 
@@ -9,5 +9,5 @@ class Entry(BaseModel):
         orm_mode = True
 
 
-class EntryCreate(BaseModel):
+class DocumentCreate(BaseModel):
     path: str

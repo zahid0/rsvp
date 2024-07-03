@@ -1,6 +1,6 @@
 from typing import List
 
-from fastapi import Depends, FastAPI
+from fastapi import Depends, FastAPI, Request
 from fastapi.responses import FileResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
@@ -21,8 +21,8 @@ templates = Jinja2Templates(directory="templates")
 
 
 @app.get("/")
-async def home():
-    return FileResponse("templates/index.html")
+async def home(request: Request):
+    return templates.TemplateResponse("index.html", {"request": request})
 
 
 @app.get("/content")
@@ -32,22 +32,22 @@ async def content():
     return {"content": content.split()}
 
 
-@app.get("/entries/", response_model=List[schema.Entry])
-async def read_entries(
+@app.get("/api/documents", response_model=List[schema.Document])
+async def read_documents(
     skip: int = 0, limit: int = 10, db: AsyncSession = Depends(database.get_db)
 ):
-    stmt = select(models.Entry).offset(skip).limit(limit)
+    stmt = select(models.Document).offset(skip).limit(limit)
     result = await db.execute(stmt)
-    entries = result.scalars().all()
-    return entries
+    documents = result.scalars().all()
+    return documents
 
 
-@app.post("/entries/", response_model=schema.Entry)
-async def create_entry(
-    entry: schema.EntryCreate, db: AsyncSession = Depends(database.get_db)
+@app.post("/api/documents", response_model=schema.Document)
+async def create_document(
+    document: schema.DocumentCreate, db: AsyncSession = Depends(database.get_db)
 ):
-    db_entry = models.Entry(path=entry.path)
-    db.add(db_entry)
+    db_document = models.Document(path=document.path)
+    db.add(db_document)
     await db.commit()
-    await db.refresh(db_entry)
-    return db_entry
+    await db.refresh(db_document)
+    return db_document

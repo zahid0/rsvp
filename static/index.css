@@ -1,0 +1,103 @@
+
+/* Body styles */
+body {
+    font-family: Arial, sans-serif;
+    line-height: 1.6;
+    margin: 0;
+    padding: 0;
+}
+
+/* Header styles */
+header {
+    background-color: #ffffff;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    padding: 1rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+header h1 {
+    font-size: 1.5rem;
+    font-weight: bold;
+    color: #333333;
+}
+
+/* Button styles */
+button {
+    cursor: pointer;
+    padding: 0.75rem 1rem;
+    border: none;
+    border-radius: 0.25rem;
+}
+
+button.bg-blue-500 {
+    background-color: #3490dc;
+    color: #ffffff;
+}
+
+button.bg-blue-500:hover {
+    background-color: #2779bd;
+}
+
+button.bg-gray-300 {
+    background-color: #e2e8f0;
+    color: #333333;
+}
+
+button.bg-gray-300:hover {
+    background-color: #cbd5e0;
+}
+
+/* Form styles */
+form {
+    margin-top: 1rem;
+}
+
+form label {
+    display: block;
+    margin-bottom: 0.5rem;
+    font-weight: bold;
+    color: #333333;
+}
+
+form input[type="text"], form textarea {
+    width: 100%;
+    padding: 0.75rem;
+    font-size: 1rem;
+    border: 1px solid #cbd5e0;
+    border-radius: 0.25rem;
+}
+
+/* Main content styles */
+main {
+    max-width: 48rem;
+    margin: 2rem auto;
+    padding: 1rem;
+    background-color: #ffffff;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+main ul {
+    list-style-type: none;
+    padding: 0;
+}
+
+main li {
+    padding: 1rem;
+    border-bottom: 1px solid #cbd5e0;
+}
+
+main li:last-child {
+    border-bottom: none;
+}
+
+/* Link styles */
+a {
+    color: #3490dc;
+    text-decoration: none;
+}
+
+a:hover {
+    text-decoration: underline;
+}

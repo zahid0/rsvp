@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <link rel="stylesheet" type="text/css" href="/static/style.css">
+  <script src="https://unpkg.com/alpinejs" defer></script>
+  <script src="https://unpkg.com/htmx.org@2.0.0"></script>
+  <script src="/static/main.js"></script>
+</head>
+<body x-data="rsvpApp()" x-init="init" x-on:keydown.space="togglePlayPause">
+
+<div id="formAndText">
+  <div style="display:flex; flex-wrap:wrap; align-items:center; justify-content: space-between; gap: 20px; padding: 20px;">
+    <div style="flex: 1 0 auto;">
+      <label for="wpm">Words per minute:</label>
+      <input type="number" id="wpm" x-model.number="wpm">
+    </div>
+    <div style="flex: 1 0 auto;">
+      <label for="num_words">Number of words to display:</label>
+      <input type="number" id="num_words" x-model.number="numWords">
+    </div>
+    <div style="flex: 1 0 auto;">
+      <label for="font_size">Font size:</label>
+      <input type="number" id="font_size" x-model.number="fontSize">
+    </div>
+  </div>
+  <p id="fulltextdisplay" x-html="fullTextDisplay"></p>
+</div>
+
+<p id="rsvp" x-html="rsvpText"></p>
+<input type="button" id="playPause" :value="playing ? 'Pause' : 'Play'" @click="togglePlayPause" x-on:keydown.space.prevent><br/>
+
+</body>
+</html>
