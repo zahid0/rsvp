@@ -1,5 +1,7 @@
-function rsvpApp() {
+function rsvpApp(document_id, chapter_id) {
   return {
+    document_id: document_id,
+    chapter_id: chapter_id,
     wpm: 300,
     numWords: 5,
     fontSize: 64,
@@ -16,7 +18,7 @@ function rsvpApp() {
 
     async fetchWords() {
       try {
-        const response = await fetch('/content');
+        const response = await fetch('/api/documents/' + this.document_id + '/chapters/' + this.chapter_id);
         const data = await response.json();
         this.words = data.content;
         this.setupWordDisplay();

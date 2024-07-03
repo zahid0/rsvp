@@ -11,3 +11,8 @@ class Document(BaseModel):
 
 class DocumentCreate(BaseModel):
     path: str
+
+
+class Chapter(BaseModel):
+    id: int
+    title: str

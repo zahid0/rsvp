@@ -1,14 +1,11 @@
-<!-- index.htmlx -->
-
-<!DOCTYPE htmlx>
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document Listing</title>
+    <title>RSVP</title>
     <link rel="stylesheet" type="text/css" href="/static/index.css">
-    <script src="https://unpkg.com/htmx.org@2.0.0"></script>
-    <script src="https://unpkg.com/alpinejs" defer></script>
+    <script src="/static/alpine.js"></script>
 </head>
 <body class="bg-gray-100">
     <div x-data="{
@@ -62,17 +59,11 @@
             <ul class="divide-y divide-gray-200">
                 <template x-for="document in documents" :key="document.id">
                     <li class="py-4 flex items-center justify-between">
-                        <div class="flex items-center">
-                            <span class="font-semibold text-gray-900 mr-2" x-text="document.id"></span>
-                            <span class="text-gray-600" x-text="document.path"></span>
-                        </div>
-                        <div>
-                            <a :href="'/detail/' + document.id" class="text-blue-500">View Details</a>
-                        </div>
+                        <a :href="'/documents/' + document.id" class="text-blue-500" x-text="document.path"></a>
                     </li>
                 </template>
             </ul>
         </main>
     </div>
 </body>
-</htmlx>
+</html>

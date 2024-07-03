@@ -17,12 +17,19 @@ config = context.config
 if config.config_file_name is not None:
     fileConfig(config.config_file_name)
 config.set_main_option("sqlalchemy.url", os.getenv("DATABASE_URL"))
+import inspect
+
+import models
+
 # add your model's MetaData object here
 # for 'autogenerate' support
 from database import Base
-import models
-import inspect
-model_list = [name for name, obj in inspect.getmembers(models) if isinstance(obj, type) and issubclass(obj, Base) and obj != Base]
+
+model_list = [
+    name
+    for name, obj in inspect.getmembers(models)
+    if isinstance(obj, type) and issubclass(obj, Base) and obj != Base
+]
 print(f"Handling migrations for {model_list}")
 
 # target_metadata = mymodel.Base.metadata

@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RSVP</title>
+    <link rel="stylesheet" type="text/css" href="/static/index.css">
+    <script src="/static/alpine.js"></script>
+    <script src="/static/document.js"></script>
+</head>
+<body class="bg-gray-100">
+    <div x-data="documentData({{ document_id }})" x-init="fetchChapters()">
+        <!-- Header -->
+        <header class="flex justify-between items-center px-4 py-2 bg-white shadow">
+            <h1 class="text-xl font-semibold">Chapters Listing</h1>
+        </header>
+
+        <!-- Document List -->
+        <main class="max-w-4xl mx-auto mt-8">
+            <ul class="divide-y divide-gray-200">
+                <template x-for="chapter in chapters" :key="chapter.id">
+                    <li class="py-4 flex items-center justify-between">
+                        <a :href="'/documents/' + document_id + '/chapters/' + chapter.id" class="text-blue-500" x-text="chapter.title"></a>
+                    </li>
+                </template>
+            </ul>
+        </main>
+    </div>
+</body>
+</html>

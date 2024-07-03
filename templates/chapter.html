@@ -2,11 +2,10 @@
 <html>
 <head>
   <link rel="stylesheet" type="text/css" href="/static/style.css">
-  <script src="https://unpkg.com/alpinejs" defer></script>
-  <script src="https://unpkg.com/htmx.org@2.0.0"></script>
-  <script src="/static/main.js"></script>
+  <script src="/static/alpine.js" defer></script>
+  <script src="/static/rsvp.js"></script>
 </head>
-<body x-data="rsvpApp()" x-init="init" x-on:keydown.space="togglePlayPause">
+<body x-data="rsvpApp({{ document_id }}, {{ chapter_id }})" x-init="init" x-on:keydown.space="togglePlayPause">
 
 <div id="formAndText">
   <div style="display:flex; flex-wrap:wrap; align-items:center; justify-content: space-between; gap: 20px; padding: 20px;">
