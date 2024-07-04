@@ -70,6 +70,36 @@ async def get_chapter_content(
     return {"content": content.split()}
 
 
+@app.get("/api/reading_config", response_model=schema.ReadingConfig)
+async def get_reading_config(db: AsyncSession = Depends(database.get_db)):
+    query = await db.execute(select(models.ReadingConfig))
+    reading_config = query.scalar()
+    if not reading_config:
+        reading_config = models.ReadingConfig()
+        db.add(reading_config)
+        await db.commit()
+        await db.refresh(reading_config)
+    return reading_config
+
+
+@app.put("/api/reading_configs/{config_id}", response_model=schema.ReadingConfig)
+async def update_reading_config(
+    config_id: int,
+    reading_config_update: schema.ReadingConfig,
+    db: AsyncSession = Depends(database.get_db),
+):
+    reading_config = await db.get(models.ReadingConfig, config_id)
+    if not reading_config:
+        raise HTTPException(
+            status_code=404, detail=f"ReadingConfig with id {config_id} not found"
+        )
+    for key, value in reading_config_update.dict(exclude_unset=True).items():
+        setattr(reading_config, key, value)
+    await db.commit()
+    await db.refresh(reading_config)
+    return reading_config
+
+
 @app.get("/")
 async def home(request: Request):
     return templates.TemplateResponse("index.html", {"request": request})

@@ -2,9 +2,12 @@ function rsvpApp(document_id, chapter_id) {
   return {
     document_id: document_id,
     chapter_id: chapter_id,
-    wpm: 300,
-    numWords: 5,
-    fontSize: 64,
+    readingConfig: {
+      words_per_minute: null,
+      number_of_words: null,
+      font_size: null,
+      sprint_minutes: null
+    },
     words: [],
     dynIndex: 0,
     intervalId: null,
@@ -13,7 +16,36 @@ function rsvpApp(document_id, chapter_id) {
     rsvpText: '',
 
     init() {
+      this.fetchReadingConfig();
       this.fetchWords();
+    },
+
+    async fetchReadingConfig() {
+      try {
+        const response = await fetch('/api/reading_config');
+        const data = await response.json();
+        this.readingConfig = data;
+      } catch (error) {
+        console.error('Error fetching reading config:', error);
+      }
+    },
+
+    async saveReadingConfig() {
+        try {
+            const response = await fetch('/api/reading_configs/' + this.readingConfig.id, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(this.readingConfig),
+            });
+
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+        } catch (error) {
+            console.error('Error saving reading config:', error);
+        }
     },
 
     async fetchWords() {
@@ -46,7 +78,7 @@ function rsvpApp(document_id, chapter_id) {
     },
 
     displayWords() {
-      const endIdx = this.dynIndex + this.numWords;
+      const endIdx = this.dynIndex + this.readingConfig.number_of_words;
       this.rsvpText = this.words.slice(this.dynIndex, endIdx).join(' ');
       this.dynIndex = endIdx >= this.words.length ? 0 : endIdx;
 
@@ -56,9 +88,9 @@ function rsvpApp(document_id, chapter_id) {
     },
 
     initRsvp() {
-      const wordsPerSecond = this.wpm / 60;
-      const interval = 1000 / wordsPerSecond * this.numWords;
-      document.getElementById('rsvp').style.fontSize = `${this.fontSize}px`;
+      const wordsPerSecond = this.readingConfig.words_per_minute / 60;
+      const interval = 1000 / wordsPerSecond * this.readingConfig.number_of_words;
+      document.getElementById('rsvp').style.fontSize = `${this.readingConfig.font_size}px`;
       this.intervalId = setInterval(() => this.displayWords(), interval);
     },
 
@@ -76,6 +108,8 @@ function rsvpApp(document_id, chapter_id) {
     },
 
     playRsvp() {
+      this.saveReadingConfig();
+
       this.initRsvp();
       this.playing = true;
       this.updateDisplay();

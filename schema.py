@@ -16,3 +16,11 @@ class DocumentCreate(BaseModel):
 class Chapter(BaseModel):
     id: int
     title: str
+
+
+class ReadingConfig(BaseModel):
+    id: int
+    words_per_minute: int
+    number_of_words: int
+    font_size: int
+    sprint_minutes: int

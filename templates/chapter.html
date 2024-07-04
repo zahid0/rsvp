@@ -11,15 +11,19 @@
   <div style="display:flex; flex-wrap:wrap; align-items:center; justify-content: space-between; gap: 20px; padding: 20px;">
     <div style="flex: 1 0 auto;">
       <label for="wpm">Words per minute:</label>
-      <input type="number" id="wpm" x-model.number="wpm">
+      <input type="number" id="wpm" x-model.number="readingConfig.words_per_minute">
     </div>
     <div style="flex: 1 0 auto;">
       <label for="num_words">Number of words to display:</label>
-      <input type="number" id="num_words" x-model.number="numWords">
+      <input type="number" id="num_words" x-model.number="readingConfig.number_of_words">
     </div>
     <div style="flex: 1 0 auto;">
       <label for="font_size">Font size:</label>
-      <input type="number" id="font_size" x-model.number="fontSize">
+      <input type="number" id="font_size" x-model.number="readingConfig.font_size">
+    </div>
+    <div style="flex: 1 0 auto;">
+      <label for="sprint_minutes">Sprint minutes:</label>
+      <input type="number" id="sprint_minutes" x-model.number="readingConfig.sprint_minutes">
     </div>
   </div>
   <p id="fulltextdisplay" x-html="fullTextDisplay"></p>
