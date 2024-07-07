@@ -5,19 +5,6 @@
   transform: translate(-50%, -50%);
 }
 
-#playPause {
-  position: absolute;
-  left: 50%;
-  transform: translateX(-50%);
-  bottom: 20px;
-}
-
-.highlight {
-  background-color: yellow;
-  font-weight: bold;
-  /* add any other styling you want for the highlighted word */
-}
-
 #formAndText {
   text-align: center;
   padding: 50px;
@@ -42,6 +29,7 @@ input[type="button"] {
   font-size: 16px;
   border: 1px solid #ced4da;
   border-radius: 4px;
+  margin-right: 10px; /* Add space between buttons */
 }
 
 input[type="button"] {
@@ -53,6 +41,18 @@ input[type="button"] {
 
 input[type="button"]:hover {
   background-color: #0056b3;
+}
+
+/* Add container for the three buttons */
+#buttonContainer {
+  display: flex;
+  justify-content: center;
+  margin-top: 20px;
+}
+
+/* Style the buttons within the container */
+#buttonContainer input[type="button"] {
+  padding: 10px 20px; /* Adjust padding as needed for button size */
 }
 
 #fulltextdisplay {
@@ -67,3 +67,9 @@ input[type="button"]:hover {
 #fulltextdisplay span {
   display: inline-block;
 }
+
+.highlight {
+  background-color: yellow;
+  font-weight: bold;
+}
+

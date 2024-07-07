@@ -2,11 +2,12 @@ function rsvpApp(document_id, chapter_id) {
   return {
     document_id: document_id,
     chapter_id: chapter_id,
-    readingConfig: {
-      words_per_minute: null,
-      number_of_words: null,
-      font_size: null,
-      sprint_minutes: null
+    readingConfig: {},
+    readingProgress: {
+      document_id: document_id,
+      chapter_id: chapter_id,
+      word_index: 0,
+      id: null
     },
     words: [],
     dynIndex: 0,
@@ -14,6 +15,9 @@ function rsvpApp(document_id, chapter_id) {
     playing: false,
     fullTextDisplay: '',
     rsvpText: '',
+    finished: false,
+    next_index: 0,
+    sprint_count: 0,
 
     init() {
       this.fetchReadingConfig();
@@ -28,6 +32,17 @@ function rsvpApp(document_id, chapter_id) {
       } catch (error) {
         console.error('Error fetching reading config:', error);
       }
+    },
+
+    async updateSprint() {
+      this.sprint_count++;
+      this.sprint_count %= (this.readingConfig.step_ups + this.readingConfig.step_downs);
+      if (this.sprint_count < this.readingConfig.step_ups) {
+        this.readingConfig.words_per_minute += this.readingConfig.ramp_step;
+      } else {
+        this.readingConfig.words_per_minute -= this.readingConfig.ramp_step;
+      }
+      this.saveReadingConfig();
     },
 
     async saveReadingConfig() {
@@ -48,11 +63,39 @@ function rsvpApp(document_id, chapter_id) {
         }
     },
 
+    async resetProgress() {
+      this.next_index = null;
+      await this.saveProgress();
+      this.fetchWords();
+    },
+
+    async saveProgress() {
+        try {
+            this.readingProgress.word_index = this.next_index;
+            const response = await fetch('/api/reading_progress/', {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(this.readingProgress),
+            });
+
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            const data = await response.json();
+        } catch (error) {
+            console.error('Error saving reading config:', error);
+        }
+    },
+
     async fetchWords() {
       try {
+        this.finished = false;
         const response = await fetch('/api/documents/' + this.document_id + '/chapters/' + this.chapter_id);
         const data = await response.json();
         this.words = data.content;
+        this.next_index = data.next_index;
         this.setupWordDisplay();
       } catch (error) {
         console.error('Error fetching content:', error);
@@ -84,6 +127,9 @@ function rsvpApp(document_id, chapter_id) {
 
       if (this.dynIndex === 0) {
         this.pauseRsvp();
+        this.saveProgress();
+        this.finished = true;
+        this.updateSprint();
       }
     },
 
@@ -112,6 +158,7 @@ function rsvpApp(document_id, chapter_id) {
 
       this.initRsvp();
       this.playing = true;
+      this.finished = false;
       this.updateDisplay();
     },
 
@@ -122,6 +169,10 @@ function rsvpApp(document_id, chapter_id) {
       this.rsvpText = "";
       this.updateDisplay();
       this.setupWordDisplay();
+    },
+
+    backToDoc() {
+      window.location.href = '/documents/' + this.document_id;
     }
   }
 }

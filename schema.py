@@ -1,3 +1,5 @@
+from typing import Optional
+
 from pydantic import BaseModel
 
 
@@ -24,3 +26,13 @@ class ReadingConfig(BaseModel):
     number_of_words: int
     font_size: int
     sprint_minutes: int
+    ramp_step: int
+    step_ups: int
+    step_downs: int
+
+
+class ReadingProgress(BaseModel):
+    id: Optional[int] = None
+    document_id: int
+    chapter_index: Optional[int] = None
+    word_index: int | None

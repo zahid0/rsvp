@@ -66,8 +66,38 @@ async def get_chapter_content(
     if not doc:
         raise HTTPException(status_code=404, detail="Document not found")
     doc_reader = DocumentReader(doc.path)
-    content = doc_reader.get_chapter_content(chapter_id).replace("\n", " <br> ")
-    return {"content": content.split()}
+    content = doc_reader.get_chapter_content(chapter_id).replace("\n", " <br> ").split()
+    config_query = await db.execute(select(models.ReadingConfig))
+    reading_config = config_query.scalar()
+    progress_query = await db.execute(
+        select(models.ReadingProgress).where(
+            models.ReadingProgress.document_id == document_id
+            and model.ReadingProgress.chapter_index == chapter_index
+        )
+    )
+    reading_progress = progress_query.scalar()
+    if reading_progress:
+        start_index = reading_progress.word_index
+        if start_index is None:
+            start_index = 0
+    else:
+        start_index = 0
+    if reading_config:
+        end_index = start_index + (
+            reading_config.words_per_minute * reading_config.sprint_minutes
+        )
+        if end_index >= len(content):
+            end_index = None
+        else:
+            while end_index > start_index and not content[end_index - 1].endswith("."):
+                end_index -= 1
+    else:
+        end_index = None
+    return {
+        "content": content[start_index:end_index],
+        "start_index": start_index,
+        "next_index": end_index,
+    }
 
 
 @app.get("/api/reading_config", response_model=schema.ReadingConfig)
@@ -98,6 +128,47 @@ async def update_reading_config(
     await db.commit()
     await db.refresh(reading_config)
     return reading_config
+
+
+@app.get("/api/reading_progress", response_model=schema.ReadingProgress | None)
+async def get_reading_progress(
+    document_id: int,
+    chapter_index: int | None = None,
+    db: AsyncSession = Depends(database.get_db),
+):
+    query = await db.execute(
+        select(models.ReadingProgress).where(
+            models.ReadingProgress.document_id == document_id
+            and model.ReadingProgress.chapter_index == chapter_index
+        )
+    )
+    reading_progress = query.scalar()
+    return reading_progress
+
+
+@app.put("/api/reading_progress", response_model=schema.ReadingProgress)
+async def update_reading_progress(
+    reading_progress: schema.ReadingProgress,
+    db: AsyncSession = Depends(database.get_db),
+):
+    query = await db.execute(
+        select(models.ReadingProgress).where(
+            models.ReadingProgress.document_id == reading_progress.document_id
+            and model.ReadingProgress.chapter_index == reading_progress.chapter_index
+        )
+    )
+    reading_progress_obj = query.scalar()
+    if reading_progress_obj:
+        for key, value in reading_progress.dict(exclude="id").items():
+            setattr(reading_progress_obj, key, value)
+    else:
+        reading_progress_obj = models.ReadingProgress(
+            **reading_progress.dict(exclude="id")
+        )
+        db.add(reading_progress_obj)
+    await db.commit()
+    await db.refresh(reading_progress_obj)
+    return reading_progress_obj
 
 
 @app.get("/")
