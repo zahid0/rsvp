@@ -1,8 +1,11 @@
-from typing import List
+import asyncio
+import json
+from typing import List, Optional
 
-from fastapi import Depends, FastAPI, HTTPException, Request
+from fastapi import Depends, FastAPI, HTTPException, Request, UploadFile
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
+from litellm import completion
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
 
@@ -13,6 +16,9 @@ from document_reader import DocumentReader
 
 # models.Base.metadata.create_all(bind=database.engine)
 
+MODEL = "groq/gemma2-9b-it"
+MAX_TOKENS = 2048
+SYSTEM_PROMPT = "You are an assistant designed to create comprehensive questionnaires to evaluate the knowledge and understanding of students on a specific subject. Your questions should be well-structured, thought-provoking, and tailored to the learning objective. Your goal is to foster critical thinking and deeper understanding."
 app = FastAPI()
 
 # Setup static files and templates
@@ -32,9 +38,12 @@ async def list_documents(
 
 @app.post("/api/documents", response_model=schema.Document)
 async def create_document(
-    document: schema.DocumentCreate, db: AsyncSession = Depends(database.get_db)
+    file: UploadFile, db: AsyncSession = Depends(database.get_db)
 ):
-    db_document = models.Document(path=document.path)
+    filename = file.filename
+    with open(f"./files/{filename}", "wb") as f:
+        f.write(file.file.read())
+    db_document = models.Document(path=filename)
     db.add(db_document)
     await db.commit()
     await db.refresh(db_document)
@@ -55,44 +64,51 @@ async def get_document_chapters(id: int, db: AsyncSession = Depends(database.get
     if not doc:
         raise HTTPException(status_code=404, detail="Document not found")
     doc_reader = DocumentReader(doc.path)
-    return doc_reader.get_chapters()
+    return doc_reader.get_chapter_titles()
 
 
-@app.get("/api/documents/{document_id}/chapters/{chapter_id}")
+@app.get("/api/documents/{document_id}/content")
 async def get_chapter_content(
-    document_id: int, chapter_id: int, db: AsyncSession = Depends(database.get_db)
+    document_id: int,
+    words_per_minute: int,
+    sprint_minutes: int,
+    chapter_id: Optional[int] = None,
+    db: AsyncSession = Depends(database.get_db),
 ):
     doc = await db.get(models.Document, document_id)
     if not doc:
         raise HTTPException(status_code=404, detail="Document not found")
     doc_reader = DocumentReader(doc.path)
-    content = doc_reader.get_chapter_content(chapter_id).replace("\n", " <br> ").split()
+    if chapter_id:
+        content_future = asyncio.create_task(doc_reader.get_chapter_content(chapter_id))
+    else:
+        content_future = asyncio.create_task(doc_reader.get_content())
     config_query = await db.execute(select(models.ReadingConfig))
-    reading_config = config_query.scalar()
+    config_query.scalar()
+    print("DBG", chapter_id)
     progress_query = await db.execute(
         select(models.ReadingProgress).where(
-            models.ReadingProgress.document_id == document_id
-            and model.ReadingProgress.chapter_index == chapter_index
+            models.ReadingProgress.document_id == document_id,
+            models.ReadingProgress.chapter_id == chapter_id,
         )
     )
     reading_progress = progress_query.scalar()
     if reading_progress:
         start_index = reading_progress.word_index
+        print("PRI", reading_progress)
         if start_index is None:
             start_index = 0
     else:
+        print("PRI zeor")
         start_index = 0
-    if reading_config:
-        end_index = start_index + (
-            reading_config.words_per_minute * reading_config.sprint_minutes
-        )
-        if end_index >= len(content):
-            end_index = None
-        else:
-            while end_index > start_index and not content[end_index - 1].endswith("."):
-                end_index -= 1
-    else:
+    end_index = start_index + (words_per_minute * sprint_minutes)
+    content = await content_future
+    content = content.replace("\n", " <br> ").split()
+    if end_index >= len(content):
         end_index = None
+    else:
+        while end_index > start_index and not content[end_index - 1].endswith("."):
+            end_index -= 1
     return {
         "content": content[start_index:end_index],
         "start_index": start_index,
@@ -133,13 +149,13 @@ async def update_reading_config(
 @app.get("/api/reading_progress", response_model=schema.ReadingProgress | None)
 async def get_reading_progress(
     document_id: int,
-    chapter_index: int | None = None,
+    chapter_id: Optional[int] = None,
     db: AsyncSession = Depends(database.get_db),
 ):
     query = await db.execute(
         select(models.ReadingProgress).where(
             models.ReadingProgress.document_id == document_id
-            and model.ReadingProgress.chapter_index == chapter_index
+            and model.ReadingProgress.chapter_id == chapter_id
         )
     )
     reading_progress = query.scalar()
@@ -154,7 +170,7 @@ async def update_reading_progress(
     query = await db.execute(
         select(models.ReadingProgress).where(
             models.ReadingProgress.document_id == reading_progress.document_id
-            and model.ReadingProgress.chapter_index == reading_progress.chapter_index
+            and model.ReadingProgress.chapter_id == reading_progress.chapter_id
         )
     )
     reading_progress_obj = query.scalar()
@@ -169,6 +185,58 @@ async def update_reading_progress(
     await db.commit()
     await db.refresh(reading_progress_obj)
     return reading_progress_obj
+
+
+@app.get("/api/test")
+async def get_test(
+    document_id: int,
+    start_index: int,
+    chapter_id: Optional[int] = None,
+    end_index: Optional[int] = None,
+    db: AsyncSession = Depends(database.get_db),
+):
+    doc = await db.get(models.Document, document_id)
+    if not doc:
+        raise HTTPException(status_code=404, detail="Document not found")
+    doc_reader = DocumentReader(doc.path)
+    if chapter_id:
+        content = await doc_reader.get_chapter_content(chapter_id)
+    else:
+        content = await doc_reader.get_content()
+    content = content.replace("\n", " <br> ").split()[start_index:end_index]
+    content = " ".join(content).replace(" <br> ", "\n")
+    prompt = f"""Generate a list of distinct, definitive, and closed-ended questions from the context of the provided text to evaluate comprehension. Each question should have a single correct answer, and the options for each question should be diverse and valid. Present the output in a clear and concise JSON format. Format: `[{{"question": "", "options": ["", "", "", ""], "right_answer": index}}]`. Do not include any additional text or comments in your response apart from the valid json.
+
+    Text:
+    {content}"""
+    response = completion(
+        model=MODEL,
+        max_tokens=MAX_TOKENS,
+        messages=[
+            {"role": "system", "content": SYSTEM_PROMPT},
+            {
+                "role": "user",
+                "content": prompt,
+            },
+        ],
+    )
+    try:
+        questions = json.loads(response.choices[0].message.content)
+    except json.decoder.JSONDecodeError as e:
+        print(response.choices[0].message.content)
+        raise e
+    return questions
+
+
+@app.post("/api/test_score")
+async def evaluate_test(
+    test_score: schema.TestScore, db: AsyncSession = Depends(database.get_db)
+):
+    test_score = models.TestScore(**test_score.dict())
+    db.add(test_score)
+    await db.commit()
+    await db.refresh(test_score)
+    return test_score
 
 
 @app.get("/")
@@ -189,3 +257,8 @@ async def home(document_id: int, chapter_id: int, request: Request):
         "chapter.html",
         {"document_id": document_id, "chapter_id": chapter_id, "request": request},
     )
+
+
+@app.get("/test")
+async def home(request: Request):
+    return templates.TemplateResponse("test.html", {"request": request})

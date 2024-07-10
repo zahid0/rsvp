@@ -1,5 +1,6 @@
-from sqlalchemy import Column, ForeignKey, Integer, String
+from sqlalchemy import Column, DateTime, ForeignKey, Integer, String
 from sqlalchemy.orm import relationship
+from sqlalchemy.sql import func
 
 from database import Base
 
@@ -29,7 +30,16 @@ class ReadingProgress(Base):
 
     id = Column(Integer, primary_key=True, index=True, autoincrement=True)
     document_id = Column(Integer, ForeignKey("documents.id", ondelete="CASCADE"))
-    chapter_index = Column(Integer, nullable=True)
+    chapter_id = Column(Integer, nullable=True)
     word_index = Column(Integer, nullable=True)
 
     document = relationship("Document", backref="reading_progresses")
+
+
+class TestScore(Base):
+    __tablename__ = "test_scores"
+
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    score = Column(Integer)
+    words_per_minute = Column(Integer)
+    timestamp = Column(DateTime(timezone=True), default=func.now())

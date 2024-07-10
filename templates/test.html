@@ -1,0 +1,28 @@
+<div id="modal">
+  <div class="modal-underlay" @click="removeModal"></div>
+  <div class="modal-content">
+    <div x-init="fetchQuestions()">
+      <form x-show="questions.length > 0">
+        <template x-for="(question, index) in questions">
+          <div>
+            <p x-text="question.question"></p>
+            <template x-for="(option, optionIndex) in question.options">
+              <div>
+                <input type="radio" :name="'question' + index" :id="'answer' + index + '-' + optionIndex" :value="optionIndex" x-model.number="answers[index]" />
+                <label :for="'answer' + index + '-' + optionIndex" x-text="option"></label>
+                <span x-show="question.right_answer === optionIndex && testSubmitted" style="color: green">&#10004;</span> <br>
+              </div>
+            </template>
+          </div>
+        </template>
+        <div class="buttonContainer">
+          <label for="removeModal" x-show="testSubmitted" id="score" x-text="'Socre: ' + testScore" style="color: green"></label>
+          <input x-show="!testSubmitted" type="button" id="submitTest" value="Submit" @click="submitTest">
+          <input x-show="testSubmitted" type="button" id="removeModal" value="Close" @click="removeModal">
+        </div>
+      </form>
+      <img x-show="questions.length === 0" alt="Result loading..." width="150" src="/static/bars.svg"/>
+    </div>
+  </div>
+</div>
+

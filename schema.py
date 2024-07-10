@@ -1,5 +1,6 @@
 from typing import Optional
 
+from fastapi import UploadFile
 from pydantic import BaseModel
 
 
@@ -12,7 +13,7 @@ class Document(BaseModel):
 
 
 class DocumentCreate(BaseModel):
-    path: str
+    file: UploadFile
 
 
 class Chapter(BaseModel):
@@ -34,5 +35,10 @@ class ReadingConfig(BaseModel):
 class ReadingProgress(BaseModel):
     id: Optional[int] = None
     document_id: int
-    chapter_index: Optional[int] = None
-    word_index: int | None
+    chapter_id: Optional[int] = None
+    word_index: Optional[int] = None
+
+
+class TestScore(BaseModel):
+    words_per_minute: int
+    score: int

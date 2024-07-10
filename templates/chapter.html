@@ -2,12 +2,29 @@
 <html>
 <head>
   <link rel="stylesheet" type="text/css" href="/static/style.css">
-  <script src="/static/alpine.js" defer></script>
+  <script src="/static/htmx.min.js"></script>
+  <script src="/static/alpine.js"></script>
   <script src="/static/rsvp.js"></script>
 </head>
-<body x-data="rsvpApp({{ document_id }}, {{ chapter_id }})" x-init="init" x-on:keydown.space="togglePlayPause">
+<body id="body" x-data="rsvpApp({{ document_id }}, {{ chapter_id }})" x-init="init" x-on:keydown.space="togglePlayPause">
 
-<div id="formAndText">
+<div x-cloak x-show="!playing" aria-label="Breadcrumb">
+  <ul class="breadcrumb-list">
+    <li>
+        <a href="/" class="breadcrumb-link">
+          <span >Home</span>
+        </a>
+      <span class="breadcrumb-separator">&#62;</span>
+    </li>
+    <li>
+        <a :href="'/documents/' + document_id" class="breadcrumb-link">
+          <span >Doc</span>
+        </a>
+    </li>
+  </ul>
+</div>
+
+<div id="formAndText" x-show="!playing">
   <div style="display:flex; flex-wrap:wrap; align-items:center; justify-content: space-between; gap: 20px; padding: 20px;">
     <div style="flex: 1 0 auto;">
       <label for="wpm">Words per minute:</label>
@@ -38,16 +55,18 @@
       <input type="number" id="step_downs" x-model.number="readingConfig.step_downs">
     </div>
   </div>
-  <p id="fulltextdisplay" x-html="fullTextDisplay"></p>
+  <p x-show="!fetchingWords" id="fulltextdisplay" x-html="fullTextDisplay"></p>
+  <img x-show="fetchingWords" alt="Result loading..." width="150" src="/static/bars.svg"/>
 </div>
 
-<p id="rsvp" x-html="rsvpText"></p>
+<p x-show="playing" id="rsvp" x-html="rsvpText"></p>
 
-<div id="buttonContainer">
+<div class="buttonContainer">
   <input x-show="!playing" type="button" id="backToDock" value="Back to Doc" @click="backToDoc">
   <input x-show="!playing" type="button" id="resetProgress" value="Start from Beginning" @click="resetProgress">
   <input type="button" id="playPause" :value="playing ? 'Pause' : 'Play'" @click="togglePlayPause" x-on:keydown.space.prevent>
-  <input x-show="finished" type="button" id="nextChunk" :value="next_index === null ? 'Done! Re-read' : 'Fetch Next Chuck'" @click="fetchWords">
+  <input x-show="finished" type="button" id="nextChunk" :value="next_index === null ? 'Done! Re-read' : 'Fetch Next Chuck'" @click="fetchNextChunk">
+  <input x-show="finished" type="button" id="takeTest" value="Take Test" hx-get="/test" hx-target="#body" hx-swap="beforeend">
 </div>
 
 
