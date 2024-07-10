@@ -50,21 +50,14 @@ async def create_document(
     return db_document
 
 
-@app.get("/api/documents/{id}", response_model=schema.Document)
+@app.get("/api/documents/{id}", response_model=schema.DocumentDetail)
 async def get_document(id: int, db: AsyncSession = Depends(database.get_db)):
-    result = await db.get(models.Document, id)
-    if not result:
-        raise HTTPException(status_code=404, detail="Document not found")
-    return result
-
-
-@app.get("/api/documents/{id}/chapters", response_model=List[schema.Chapter])
-async def get_document_chapters(id: int, db: AsyncSession = Depends(database.get_db)):
     doc = await db.get(models.Document, id)
     if not doc:
         raise HTTPException(status_code=404, detail="Document not found")
     doc_reader = DocumentReader(doc.path)
-    return doc_reader.get_chapter_titles()
+    chapters = doc_reader.get_chapter_titles()
+    return {"id": doc.id, "path": doc.path, "chapters": chapters}
 
 
 @app.get("/api/documents/{document_id}/content")

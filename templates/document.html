@@ -4,23 +4,36 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>RSVP</title>
-    <link rel="stylesheet" type="text/css" href="/static/index.css">
-    <script src="/static/alpine.js"></script>
+    <link rel="stylesheet" type="text/css" href="/static/style.css">
     <script src="/static/document.js"></script>
+    <script src="/static/alpine.js" defer></script>
+    <script src="/static/htmx.min.js" defer></script>
 </head>
-<body class="bg-gray-100">
-    <div x-data="documentData({{ document_id }})" x-init="fetchChapters()">
-        <!-- Header -->
-        <header class="flex justify-between items-center px-4 py-2 bg-white shadow">
-            <h1 class="text-xl font-semibold">Chapters Listing</h1>
-        </header>
+<body>
+    <div x-data="documentData({{ document_id }})" x-init="fetchDocument">
 
-        <!-- Document List -->
-        <main class="max-w-4xl mx-auto mt-8">
-            <ul class="divide-y divide-gray-200">
+      <div x-cloak aria-label="Breadcrumb">
+        <ul class="breadcrumb-list">
+          <li>
+              <a href="/" class="breadcrumb-link">
+                <span >Home</span>
+              </a>
+            <span class="breadcrumb-separator">&#62;</span>
+          </li>
+          <li>
+              <span x-text="doc_title"></span>
+          </li>
+        </ul>
+      </div>
+
+        <main >
+            <ul >
+                <li x-show="chapters.length === 0">
+                    <a href="#read" x-text="doc_title"></a>
+                </li>
                 <template x-for="chapter in chapters" :key="chapter.id">
-                    <li class="py-4 flex items-center justify-between">
-                        <a :href="'/documents/' + document_id + '/chapters/' + chapter.id" class="text-blue-500" x-text="chapter.title"></a>
+                    <li >
+                        <a :href="'#read/chapters/' + chapter.id" x-text="chapter.title"></a>
                     </li>
                 </template>
             </ul>

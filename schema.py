@@ -1,4 +1,4 @@
-from typing import Optional
+from typing import List, Optional
 
 from fastapi import UploadFile
 from pydantic import BaseModel
@@ -20,6 +20,10 @@ class Chapter(BaseModel):
     id: int
     title: str
 
+class DocumentDetail(BaseModel):
+    id: int
+    path: str
+    chapters: List[Chapter]
 
 class ReadingConfig(BaseModel):
     id: int

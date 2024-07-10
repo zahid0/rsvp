@@ -1,3 +1,36 @@
+/* Main content styles */
+main {
+    max-width: 48rem;
+    margin: 2rem auto;
+    padding: 1rem;
+    background-color: #ffffff;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+main ul {
+    list-style-type: none;
+    padding: 0;
+}
+
+main li {
+    padding: 1rem;
+    border-bottom: 1px solid #cbd5e0;
+}
+
+main li:last-child {
+    border-bottom: none;
+}
+
+/* Link styles */
+a {
+    color: #3490dc;
+    text-decoration: none;
+}
+
+a:hover {
+    text-decoration: underline;
+}
+
 #rsvp {
   position: absolute;
   left: 50%;

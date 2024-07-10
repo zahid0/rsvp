@@ -64,7 +64,7 @@ class DocumentReader:
                     last_page = reader.get_destination_page_number(next_chapter)
                 else:
                     # If this is the last chapter, 'last_page' is the total pages of the document
-                    last_page = total_pages + 1
+                    last_page = total_pages
                 for i in range(start_page, last_page):
                     text += "\n" + reader.get_page(i).extract_text()
         elif self.extension == "txt":
