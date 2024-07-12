@@ -235,23 +235,3 @@ async def evaluate_test(
 @app.get("/")
 async def home(request: Request):
     return templates.TemplateResponse("index.html", {"request": request})
-
-
-@app.get("/documents/{id}")
-async def home(id: int, request: Request):
-    return templates.TemplateResponse(
-        "document.html", {"document_id": id, "request": request}
-    )
-
-
-@app.get("/documents/{document_id}/chapters/{chapter_id}")
-async def home(document_id: int, chapter_id: int, request: Request):
-    return templates.TemplateResponse(
-        "chapter.html",
-        {"document_id": document_id, "chapter_id": chapter_id, "request": request},
-    )
-
-
-@app.get("/test")
-async def home(request: Request):
-    return templates.TemplateResponse("test.html", {"request": request})

@@ -1,67 +1,15 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
+  <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>RSVP</title>
     <link rel="stylesheet" type="text/css" href="/static/index.css">
+    <script src="/static/htmx.min.js"></script>
+    <script src="/static/main.js"></script>
     <script src="/static/alpine.js"></script>
-</head>
-<body class="bg-gray-100">
-    <div x-data="{
-        documents: [],
-        showAddForm: false,
-        fetchDocuments: async function() {
-            let response = await fetch('/api/documents');
-            this.documents = await response.json();
-        },
-        addDocument: async function() {
-            const file = document.getElementById('new-file').files[0];
-            const formData = new FormData();
-            formData.append('file', file);
-            let response = await fetch('/api/documents', {
-                method: 'POST',
-                body: formData
-            });
-            if (response.ok) {
-                this.showAddForm = false;
-                this.fetchDocuments();
-            }
-        },
-    }" x-init="fetchDocuments()">
-        <!-- Header -->
-        <header class="flex justify-between items-center px-4 py-2 bg-white shadow">
-            <h1 class="text-xl font-semibold">Document Listing</h1>
-            <button @click="showAddForm = true" class="px-4 py-2 bg-blue-500 text-white rounded">Add New Document</button>
-        </header>
+  </head>
+  <body id="main" x-data="main" x-init="init">
 
-        <!-- Add Document Form -->
-        <div x-show="showAddForm" class="fixed inset-0 flex items-center justify-center bg-gray-700 bg-opacity-50">
-            <div class="bg-white p-6 rounded shadow-lg">
-                <h2 class="text-lg font-semibold mb-4">Add New Document</h2>
-                <form @submit.prevent="addDocument()">
-                    <div class="mb-4">
-                        <label for="new-file" class="block text-sm font-medium text-gray-700">File:</label>
-                        <input type="file" id="new-file" accept=".pdf,.txt,.epub" class="mt-1 block w-full px-3 py-2 border rounded-md">
-                    </div>
-                    <div class="mt-4 flex justify-end">
-                        <button type="submit" class="px-4 py-2 bg-blue-500 text-white rounded">Add Document</button>
-                        <button @click="showAddForm = false" class="ml-2 px-4 py-2 bg-gray-300 rounded">Cancel</button>
-                    </div>
-                </form>
-            </div>
-        </div>
-
-        <!-- Document List -->
-        <main class="max-w-4xl mx-auto mt-8">
-            <ul class="divide-y divide-gray-200">
-                <template x-for="document in documents" :key="document.id">
-                    <li class="py-4 flex items-center justify-between">
-                        <a :href="'/documents/' + document.id" class="text-blue-500" x-text="document.path"></a>
-                    </li>
-                </template>
-            </ul>
-        </main>
-    </div>
-</body>
+  </body>
 </html>

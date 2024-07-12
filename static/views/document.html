@@ -1,0 +1,12 @@
+<main x-data="documentData" x-init="init">
+  <ul id="documentDetail">
+    <li x-show="chapters.length === 0">
+      <a :href="'#/documents/' + document_id + '/read" class="text-blue-500" x-text="doc_title" hx-get="/static/views/rsvp.html" hx-target="#main"></a>
+    </li>
+    <template x-for="chapter in chapters" :key="chapter.id">
+      <li >
+        <a :href="'#/documents/' + document_id + '/read/chapters/' + chapter.id" class="text-blue-500" x-text="chapter.title" hx-get="/static/views/rsvp.html" hx-target="#main"></a>
+      </li>
+    </template>
+  </ul>
+</main>

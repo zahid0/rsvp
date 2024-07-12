@@ -1,11 +1,88 @@
+function main() {
+  return {
+    init() {
+      this.route();
+      window.addEventListener('hashchange', () => this.route());
+    },
+
+    route() {
+      if (window.location.hash === ''){
+        htmx.ajax("GET", "/static/views/listing.html", {
+          swap: "innerHTML",
+          target: "#main"
+        });
+      } else if (window.location.hash.match(/^#\/documents\/\d+$/)) {
+        htmx.ajax("GET", "/static/views/document.html", {
+          swap: "innerHTML",
+          target: "#main"
+        });
+      } else if (window.location.hash.match(/^#\/documents\/\d+\/read(\/chapters\/\d+)?$/)) {
+        htmx.ajax("GET", "/static/views/rsvp.html", {
+          swap: "innerHTML",
+          target: "#main"
+        });
+      }
+    }
+  }
+}
+
+function listingPage() {
+  return {
+  documents: [],
+    showAddForm: false,
+    fetchDocuments: async function() {
+      let response = await fetch('/api/documents');
+      this.documents = await response.json();
+      await this.$nextTick;
+      htmx.process(document.getElementById('documentList'));
+    },
+    addDocument: async function() {
+      const file = document.getElementById('new-file').files[0];
+      const formData = new FormData();
+      formData.append('file', file);
+      let response = await fetch('/api/documents', {
+        method: 'POST',
+        body: formData
+      });
+      if (response.ok) {
+        this.showAddForm = false;
+        this.fetchDocuments();
+      }
+    }
+  }
+}
+
+function documentData() {
+  return {
+    chapters: [],
+    doc_title: '',
+    document_id: null,
+
+    init () {
+      this.document_id = Number(window.location.hash.split('/')[2]);
+      this.fetchDocument();
+    },
+
+    async fetchDocument() {
+        const response = await fetch('/api/documents/' + this.document_id);
+        const data = await response.json();
+        this.chapters = data.chapters;
+        this.doc_title = data.path;
+        await this.$nextTick;
+        htmx.process(document.getElementById('documentDetail'));
+    }
+  }
+}
+
+
 function rsvpApp(document_id, chapter_id) {
   return {
-    document_id: document_id,
-    chapter_id: chapter_id,
+    document_id: null,
+    chapter_id: null,
     readingConfig: {},
     readingProgress: {
-      document_id: document_id,
-      chapter_id: chapter_id,
+      document_id: null,
+      chapter_id: null,
       word_index: 0,
       id: null
     },
@@ -26,6 +103,12 @@ function rsvpApp(document_id, chapter_id) {
     testScore: null,
 
     init() {
+      this.document_id = Number(window.location.hash.split('/')[2]);
+      if (window.location.hash.split('/').length === 6) {
+        this.chapter_id = Number(window.location.hash.split('/')[5]);
+      }
+      this.readingProgress.document_id = this.document_id;
+      this.readingProgress.chapter_id = this.chapter_id;
       this.fetchReadingConfig();
       this.fetchWords();
     },

@@ -1,0 +1,35 @@
+<div x-data="listingPage()" x-init="fetchDocuments">
+  <!-- Header -->
+  <header class="flex justify-between items-center px-4 py-2 bg-white shadow">
+    <h1>Document Listing</h1>
+    <button @click="showAddForm = true" class="px-4 py-2 bg-blue-500 text-white rounded">Add New Document</button>
+  </header>
+
+  <!-- Add Document Form -->
+  <div x-show="showAddForm" class="fixed inset-0 flex items-center justify-center bg-gray-700 bg-opacity-50">
+    <div class="bg-white p-6 rounded shadow-lg">
+      <h2 class="text-lg font-semibold mb-4">Add New Document</h2>
+      <form @submit.prevent="addDocument()">
+        <div class="mb-4">
+          <label for="new-file" class="block text-sm font-medium text-gray-700">File:</label>
+          <input type="file" id="new-file" accept=".pdf,.txt,.epub" class="mt-1 block w-full px-3 py-2 border rounded-md">
+        </div>
+        <div class="mt-4 flex justify-end">
+          <button type="submit" class="px-4 py-2 bg-blue-500 text-white rounded">Add Document</button>
+          <button @click.prevent="showAddForm = false" class="ml-2 px-4 py-2 bg-gray-300 rounded">Cancel</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Document List -->
+  <main class="max-w-4xl mx-auto mt-8">
+    <ul id="documentList" class="divide-y divide-gray-200">
+      <template x-for="document in documents" :key="document.id">
+        <li class="py-4 flex items-center justify-between">
+          <a :href="'#/documents/' + document.id" class="text-blue-500" x-text="document.path" hx-get="/static/views/document.html" hx-target="#main"></a>
+        </li>
+      </template>
+    </ul>
+  </main>
+</div>
