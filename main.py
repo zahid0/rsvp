@@ -3,8 +3,8 @@ import json
 from typing import List, Optional
 
 from fastapi import Depends, FastAPI, HTTPException, Request, UploadFile
+from fastapi.responses import FileResponse
 from fastapi.staticfiles import StaticFiles
-from fastapi.templating import Jinja2Templates
 from litellm import completion
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
@@ -21,9 +21,8 @@ MAX_TOKENS = 2048
 SYSTEM_PROMPT = "You are an assistant designed to create comprehensive questionnaires to evaluate the knowledge and understanding of students on a specific subject. Your questions should be well-structured, thought-provoking, and tailored to the learning objective. Your goal is to foster critical thinking and deeper understanding."
 app = FastAPI()
 
-# Setup static files and templates
+# Setup static files
 app.mount("/static", StaticFiles(directory="static"), name="static")
-templates = Jinja2Templates(directory="templates")
 
 
 @app.get("/api/documents", response_model=List[schema.Document])
@@ -234,4 +233,4 @@ async def evaluate_test(
 
 @app.get("/")
 async def home(request: Request):
-    return templates.TemplateResponse("index.html", {"request": request})
+    return FileResponse('static/index.html')
