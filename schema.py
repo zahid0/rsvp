@@ -20,10 +20,12 @@ class Chapter(BaseModel):
     id: int
     title: str
 
+
 class DocumentDetail(BaseModel):
     id: int
     path: str
     chapters: List[Chapter]
+
 
 class ReadingConfig(BaseModel):
     id: int

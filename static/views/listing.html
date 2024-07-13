@@ -27,7 +27,7 @@
     <ul id="documentList" class="divide-y divide-gray-200">
       <template x-for="document in documents" :key="document.id">
         <li class="py-4 flex items-center justify-between">
-          <a :href="'#/documents/' + document.id" class="text-blue-500" x-text="document.path" hx-get="/static/views/document.html" hx-target="#main"></a>
+          <a :href="'#/documents/' + document.id" class="text-blue-500" x-text="document.path" @click.prevent="navigateToDocument(document.id)"></a>
         </li>
       </template>
     </ul>

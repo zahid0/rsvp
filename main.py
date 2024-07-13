@@ -233,4 +233,4 @@ async def evaluate_test(
 
 @app.get("/")
 async def home(request: Request):
-    return FileResponse('static/index.html')
+    return FileResponse("static/index.html")

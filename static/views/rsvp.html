@@ -58,7 +58,7 @@
   <input x-show="!playing" type="button" id="resetProgress" value="Start from Beginning" @click="resetProgress">
   <input type="button" id="playPause" :value="playing ? 'Pause' : 'Play'" @click="togglePlayPause" x-on:keydown.space.prevent>
   <input x-show="finished" type="button" id="nextChunk" :value="next_index === null ? 'Done! Re-read' : 'Fetch Next Chuck'" @click="fetchNextChunk">
-  <input x-show="finished" type="button" id="takeTest" value="Take Test" hx-get="/static/views/test.html" hx-target="#rsvpReader" hx-swap="beforeend">
+  <input x-show="finished" type="button" id="takeTest" value="Take Test" @click.prevent="loadTest">
 </div>
 
 

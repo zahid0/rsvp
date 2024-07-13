@@ -7,20 +7,28 @@ function main() {
 
     route() {
       if (window.location.hash === ''){
-        htmx.ajax("GET", "/static/views/listing.html", {
-          swap: "innerHTML",
-          target: "#main"
-        });
+        fetch('/static/views/listing.html')
+          .then(response => response.text())
+          .then(html => {
+            const mainElement = document.querySelector('#main');
+            if (mainElement) {
+              mainElement.innerHTML = html;
+            }
+          });
       } else if (window.location.hash.match(/^#\/documents\/\d+$/)) {
-        htmx.ajax("GET", "/static/views/document.html", {
-          swap: "innerHTML",
-          target: "#main"
-        });
+        fetch("/static/views/document.html")
+          .then(response => response.text())
+          .then(data => {
+            const mainElement = document.querySelector("#main");
+            mainElement.innerHTML = data;
+          });
       } else if (window.location.hash.match(/^#\/documents\/\d+\/read(\/chapters\/\d+)?$/)) {
-        htmx.ajax("GET", "/static/views/rsvp.html", {
-          swap: "innerHTML",
-          target: "#main"
-        });
+        fetch("/static/views/rsvp.html")
+          .then(response => response.text())
+          .then(data => {
+            const main = document.querySelector("#main");
+            main.innerHTML = data;
+          });
       }
     }
   }
@@ -30,12 +38,17 @@ function listingPage() {
   return {
   documents: [],
     showAddForm: false,
+
+    navigateToDocument(document_id) {
+      window.location.hash = '#/documents/' + document_id;
+      window.history.replaceState({}, '', window.location.href);
+    },
+
     fetchDocuments: async function() {
       let response = await fetch('/api/documents');
       this.documents = await response.json();
-      await this.$nextTick;
-      htmx.process(document.getElementById('documentList'));
     },
+
     addDocument: async function() {
       const file = document.getElementById('new-file').files[0];
       const formData = new FormData();
@@ -63,13 +76,20 @@ function documentData() {
       this.fetchDocument();
     },
 
+    navigateToReader(chapter_id) {
+      let reader_url = '#/documents/' + this.document_id + '/read';
+      if (chapter_id !== null) {
+        reader_url += '/chapters/' + chapter_id;
+      }
+      window.location.hash = reader_url;
+      window.history.replaceState({}, '', window.location.href);
+    },
+
     async fetchDocument() {
         const response = await fetch('/api/documents/' + this.document_id);
         const data = await response.json();
         this.chapters = data.chapters;
         this.doc_title = data.path;
-        await this.$nextTick;
-        htmx.process(document.getElementById('documentDetail'));
     }
   }
 }
@@ -274,6 +294,15 @@ function rsvpApp(document_id, chapter_id) {
 
     backToDoc() {
       window.location.href = '/documents/' + this.document_id;
+    },
+
+    async loadTest() {
+      fetch('/static/views/test.html')
+        .then(response => response.text())
+        .then(html => {
+          const rsvpElement = document.querySelector('#rsvpReader');
+          rsvpElement.insertAdjacentHTML('beforeend', html);
+        });
     },
 
     testParams() {

@@ -32,8 +32,7 @@ class DocumentReader:
                 outline = reader.outline
                 toc = self.process_pdf_outline(outline)
         elif self.extension == "txt":
-            # Logic here to extract chapters based on structure
-            pass  # Custom logic required here
+            return []
         return toc
 
     def get_chapter_titles(self):
@@ -43,8 +42,7 @@ class DocumentReader:
             for i, chapter in enumerate(chapters):
                 titles.append({"id": i, "title": chapter.title})
         elif self.extension == "txt":
-            # Logic here to extract chapters based on structure
-            pass  # Custom logic required here
+            return []
         return titles
 
     async def get_chapter_content(self, chapter_id):
@@ -68,8 +66,8 @@ class DocumentReader:
                 for i in range(start_page, last_page):
                     text += "\n" + reader.get_page(i).extract_text()
         elif self.extension == "txt":
-            # Add logic here to extract the content of a specific chapter for txt files
-            pass  # This section needs to be updated with the proper parsing
+            with open(self.path, "r") as f:
+                return f.read()
         return text
 
     async def get_content(self):
@@ -79,4 +77,7 @@ class DocumentReader:
                 reader = pypdf.PdfReader(f)
                 for page in reader.pages:
                     text += "\n" + page.extract_text()
+        elif self.extension == "txt":
+            with open(self.path, "r") as f:
+                return f.read()
         return text
