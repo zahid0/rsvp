@@ -1,7 +1,7 @@
 <div id="modal">
   <div class="modal-underlay" @click="removeModal"></div>
   <div class="modal-content">
-    <div x-init="fetchQuestions()">
+    <div x-init="fetchQuestions">
       <form x-show="questions.length > 0">
         <template x-for="(question, index) in questions">
           <div>

@@ -1,4 +1,4 @@
-<div x-data="listingPage()" x-init="fetchDocuments">
+<div x-data="listingPage" x-init="fetchDocuments">
   <!-- Header -->
   <header class="flex justify-between items-center px-4 py-2 bg-white shadow">
     <h1>Document Listing</h1>
@@ -25,9 +25,9 @@
   <!-- Document List -->
   <main class="max-w-4xl mx-auto mt-8">
     <ul id="documentList" class="divide-y divide-gray-200">
-      <template x-for="document in documents" :key="document.id">
+      <template x-for="doc in documents" :key="doc.id">
         <li class="py-4 flex items-center justify-between">
-          <a :href="'#/documents/' + document.id" class="text-blue-500" x-text="document.path" @click.prevent="navigateToDocument(document.id)"></a>
+          <a :href="'#/documents/' + doc.id" class="text-blue-500" x-text="doc.path" @click.prevent="navigateToDocument(doc.id)"></a>
         </li>
       </template>
     </ul>
