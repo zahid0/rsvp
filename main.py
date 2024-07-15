@@ -1,5 +1,6 @@
 import asyncio
 import json
+import os
 from typing import List, Optional
 
 from fastapi import Depends, FastAPI, HTTPException, Request, UploadFile
@@ -16,7 +17,7 @@ from document_reader import DocumentReader
 
 # models.Base.metadata.create_all(bind=database.engine)
 
-MODEL = "groq/gemma2-9b-it"
+MODEL = "groq/mixtral-8x7b-32768"
 MAX_TOKENS = 2048
 SYSTEM_PROMPT = "You are an assistant designed to create comprehensive questionnaires to evaluate the knowledge and understanding of students on a specific subject. Your questions should be well-structured, thought-provoking, and tailored to the learning objective. Your goal is to foster critical thinking and deeper understanding."
 app = FastAPI()
@@ -47,6 +48,24 @@ async def create_document(
     await db.commit()
     await db.refresh(db_document)
     return db_document
+
+
+@app.delete("/api/documents/{document_id}")
+async def delete_document(
+    document_id: int, db: AsyncSession = Depends(database.get_db)
+):
+    db_document = await db.get(models.Document, document_id)
+    if db_document is None:
+        raise HTTPException(status_code=404, detail="Document not found")
+
+    # Delete the file from disk before removing the database entry
+    file_path = f"./files/{db_document.path}"
+    if os.path.exists(file_path):
+        os.remove(file_path)
+
+    await db.delete(db_document)
+    await db.commit()
+    return {"message": "Document deleted successfully"}
 
 
 @app.get("/api/documents/{id}", response_model=schema.DocumentDetail)

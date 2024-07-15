@@ -6,8 +6,15 @@
   </header>
 
   <!-- Add Document Form -->
-  <div x-show="showAddForm" class="fixed inset-0 flex items-center justify-center bg-gray-700 bg-opacity-50">
-    <div class="bg-white p-6 rounded shadow-lg">
+
+<div x-show="showAddForm" class="modal">
+  <div class="modal-underlay" @click="showAddForm = false"></div>
+  <div class="modal-content">
+    <div>
+      <button @click="currentTab = 'file-upload'">File Upload</button>
+      <button @click="currentTab = 'text-input'">Add as Text</button>
+    </div>
+    <div x-show="currentTab === 'file-upload'" class="bg-white p-6 rounded shadow-lg">
       <h2 class="text-lg font-semibold mb-4">Add New Document</h2>
       <form @submit.prevent="addDocument()">
         <div class="mb-4">
@@ -20,14 +27,33 @@
         </div>
       </form>
     </div>
+    <div x-show="currentTab === 'text-input'" class="bg-white p-6 rounded shadow-lg">
+      <h2 class="text-lg font-semibold mb-4">Add New Document</h2>
+      <form @submit.prevent="addTextDocument()">
+        <div class="mb-4">
+          <label for="title" class="block text-sm font-medium text-gray-700">Title:</label>
+          <input type="text" id="title" x-model="title" class="...">
+        </div>
+        <div class="mb-4">
+          <label for="content" class="block text-sm font-medium text-gray-700">Content:</label>
+          <textarea id="content" x-model="content" class="..."></textarea>
+        </div>
+        <div class="mt-4 flex justify-end">
+          <button type="submit" class="px-4 py-2 bg-blue-500 text-white rounded">Add Document</button>
+          <button @click.prevent="showAddForm = false" class="ml-2 px-4 py-2 bg-gray-300 rounded">Cancel</button>
+        </div>
+      </form>
+    </div>
+    <!-- Tab navigation -->
   </div>
-
+</div>
   <!-- Document List -->
   <main class="max-w-4xl mx-auto mt-8">
     <ul id="documentList" class="divide-y divide-gray-200">
       <template x-for="doc in documents" :key="doc.id">
         <li class="py-4 flex items-center justify-between">
           <a :href="'#/documents/' + doc.id" class="text-blue-500" x-text="doc.path" @click.prevent="navigateToDocument(doc.id)"></a>
+          <i class="delete-button" @click="confirmDelete(doc.id)"></i>
         </li>
       </template>
     </ul>

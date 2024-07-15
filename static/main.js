@@ -38,6 +38,9 @@ function listingPage() {
   return {
   documents: [],
     showAddForm: false,
+    currentTab: 'file-upload',
+    title: '',
+    content: '',
 
     navigateToDocument(document_id) {
       window.location.hash = '#/documents/' + document_id;
@@ -51,6 +54,14 @@ function listingPage() {
 
     addDocument: async function() {
       const file = document.getElementById('new-file').files[0];
+      this.uploadFile(file);
+    },
+    addTextDocument: async function() {
+      const blob = new Blob([this.content], { type: 'text/plain' });
+      const file = new File([blob], `${this.title}.txt`, {type: 'text/plain'});
+      this.uploadFile(file);
+    },
+    uploadFile: async function(file) {
       const formData = new FormData();
       formData.append('file', file);
       let response = await fetch('/api/documents', {
@@ -59,6 +70,17 @@ function listingPage() {
       });
       if (response.ok) {
         this.showAddForm = false;
+        this.fetchDocuments();
+      }
+    },
+    confirmDelete: function (docId) {
+      if (confirm('Are you sure you want to delete this document?')) {
+          this.deleteDocument(docId); // Call the delete API or function
+      }
+    },
+    deleteDocument: async function(docId) {
+      let response = await fetch('/api/documents/' + docId, {method: 'DELETE'});
+      if (response.ok) {
         this.fetchDocuments();
       }
     }
