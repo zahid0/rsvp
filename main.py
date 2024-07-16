@@ -7,6 +7,7 @@ from fastapi import Depends, FastAPI, HTTPException, Request, UploadFile
 from fastapi.responses import FileResponse
 from fastapi.staticfiles import StaticFiles
 from litellm import completion
+from pydantic import ValidationError
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
 
@@ -96,7 +97,6 @@ async def get_chapter_content(
         content_future = asyncio.create_task(doc_reader.get_content())
     config_query = await db.execute(select(models.ReadingConfig))
     config_query.scalar()
-    print("DBG", chapter_id)
     progress_query = await db.execute(
         select(models.ReadingProgress).where(
             models.ReadingProgress.document_id == document_id,
@@ -106,16 +106,15 @@ async def get_chapter_content(
     reading_progress = progress_query.scalar()
     if reading_progress:
         start_index = reading_progress.word_index
-        print("PRI", reading_progress)
         if start_index is None:
             start_index = 0
     else:
-        print("PRI zeor")
         start_index = 0
     end_index = start_index + (words_per_minute * sprint_minutes)
     content = await content_future
     content = content.replace("\n", " <br> ").split()
-    if end_index >= len(content):
+    total_words = len(content)
+    if end_index >= total_words:
         end_index = None
     else:
         while end_index > start_index and not content[end_index - 1].endswith("."):
@@ -124,6 +123,7 @@ async def get_chapter_content(
         "content": content[start_index:end_index],
         "start_index": start_index,
         "next_index": end_index,
+        "total_words": total_words,
     }
 
 
@@ -198,7 +198,7 @@ async def update_reading_progress(
     return reading_progress_obj
 
 
-@app.get("/api/test")
+@app.get("/api/test", response_model=List[schema.Question])
 async def get_test(
     document_id: int,
     start_index: int,
@@ -220,6 +220,7 @@ async def get_test(
 
     Text:
     {content}"""
+
     response = completion(
         model=MODEL,
         max_tokens=MAX_TOKENS,
@@ -233,10 +234,14 @@ async def get_test(
     )
     try:
         questions = json.loads(response.choices[0].message.content)
+        valid_questions = [schema.Question(**q) for q in questions]
+        return valid_questions
     except json.decoder.JSONDecodeError as e:
         print(response.choices[0].message.content)
         raise e
-    return questions
+    except ValidationError as e:
+        print(response.choices[0].message.content)
+        raise e
 
 
 @app.post("/api/test_score")

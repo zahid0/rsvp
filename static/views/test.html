@@ -16,12 +16,16 @@
           </div>
         </template>
         <div class="buttonContainer">
-          <label for="removeModal" x-show="testSubmitted" id="score" x-text="'Socre: ' + testScore" style="color: green"></label>
+          <label for="removeModal" x-show="testSubmitted" id="score" x-text="'Socre: ' + testScoreText" style="color: green"></label>
           <input x-show="!testSubmitted" type="button" id="submitTest" value="Submit" @click="submitTest">
           <input x-show="testSubmitted" type="button" id="removeModal" value="Close" @click="removeModal">
         </div>
       </form>
-      <img x-show="questions.length === 0" alt="Result loading..." width="150" src="/static/loader.svg"/>
+      <img x-show="fetchingQuestions" alt="Result loading..." width="150" src="/static/loader.svg"/>
+      <div x-show="fetchingQuestionFailed" class="buttonContainer">
+        <p>Test is not available at the moment. Please try again!</p><br>
+        <input type="button" value="Close" @click="removeModal">
+      </div>
     </div>
   </div>
 </div>

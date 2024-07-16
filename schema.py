@@ -1,7 +1,7 @@
 from typing import List, Optional
 
 from fastapi import UploadFile
-from pydantic import BaseModel
+from pydantic import BaseModel, ValidationError, validator
 
 
 class Document(BaseModel):
@@ -43,6 +43,20 @@ class ReadingProgress(BaseModel):
     document_id: int
     chapter_id: Optional[int] = None
     word_index: Optional[int] = None
+
+
+class Question(BaseModel):
+    question: str
+    options: List[str]
+    right_answer: int
+
+    @validator("right_answer")
+    def right_answer_validator(cls, value, values):
+        if "options" not in values:
+            raise ValidationError("'options' key is not present in the JSON object.")
+        if value < 0 or value >= len(values["options"]):
+            raise ValueError("right_answer index is out of range for options")
+        return value
 
 
 class TestScore(BaseModel):

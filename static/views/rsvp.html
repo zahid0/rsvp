@@ -49,6 +49,10 @@
   </div>
   <p x-show="!fetchingWords" id="fulltextdisplay" x-html="fullTextDisplay"></p>
   <img x-show="fetchingWords" alt="Result loading..." width="150" src="/static/loader.svg"/>
+  <div x-show="!fetchingWords" style="width: 100%; height: 20px; position:relative;">
+      <div :style="'width: ' + progress_bar_percentage + '%; height: 100%; background-color: yellow; position: absolute;'" aria-valuemin="0" aria-valuemax="100" :aria-valuenow="progress_bar_percentage"></div>
+      <div :style="'width: ' + progressDone + '%; height: 100%; background-color: green; position: absolute;'" aria-valuemin="0" aria-valuemax="100" :aria-valuenow="progressDone"></div>
+  </div>
 </div>
 
 <p x-show="playing" id="rsvp" x-html="rsvpText"></p>

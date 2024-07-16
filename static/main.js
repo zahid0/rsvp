@@ -143,6 +143,10 @@ function rsvpApp(document_id, chapter_id) {
     answers: [],
     testSubmitted: false,
     testScore: null,
+    testScoreText: '',
+    progress_bar_percentage: 0,
+    progressDone: 0,
+    fetchingQuestionFailed: false,
 
     init() {
       this.document_id = Number(window.location.hash.split('/')[2]);
@@ -242,6 +246,12 @@ function rsvpApp(document_id, chapter_id) {
         this.next_index = data.next_index;
         this.start_index = data.start_index;
         this.setupWordDisplay();
+        if (data.next_index === null) {
+          this.progress_bar_percentage = 100;
+        } else {
+          this.progress_bar_percentage = 100 * data.next_index / data.total_words;
+        }
+        this.progressDone = 100 * this.start_index / data.total_words;
         this.fetchingWords = false;
       } catch (error) {
         console.error('Error fetching content:', error);
@@ -267,14 +277,15 @@ function rsvpApp(document_id, chapter_id) {
     },
 
     displayWords() {
-      const endIdx = this.dynIndex + this.readingConfig.number_of_words;
-      this.rsvpText = this.words.slice(this.dynIndex, endIdx).join(' ');
-      this.dynIndex = endIdx >= this.words.length ? 0 : endIdx;
-
-      if (this.dynIndex === 0) {
+      if (this.dynIndex >= this.words.length) {
+        this.dynIndex = 0;
         this.pauseRsvp();
         this.saveProgress();
         this.finished = true;
+      } else {
+        const endIdx = this.dynIndex + this.readingConfig.number_of_words;
+        this.rsvpText = this.words.slice(this.dynIndex, endIdx).join(' ');
+        this.dynIndex = endIdx;
       }
     },
 
@@ -343,11 +354,13 @@ function rsvpApp(document_id, chapter_id) {
     },
 
     async fetchQuestions() {
+        this.fetchingQuestions = true;
         let params = this.testParams();
         let query = new URLSearchParams(params);
         const response = await fetch('/api/test/?' + query);
         if (!response.ok) {
-          this.removeModal();
+          this.fetchingQuestions = false;
+          this.fetchingQuestionFailed = true;
           return;
         }
         const data = await response.json();
@@ -355,6 +368,7 @@ function rsvpApp(document_id, chapter_id) {
           this.answers.push('');
         }
         this.questions = data;
+        this.fetchingQuestions = false;
     },
 
     removeModal() {
@@ -363,6 +377,8 @@ function rsvpApp(document_id, chapter_id) {
       this.answers = [];
       this.testSubmitted = false;
       this.testScore = null;
+      this.fetchingQuestionFailed = false;
+      this.testScoreText = '';
     },
 
     async submitTest() {
@@ -372,6 +388,7 @@ function rsvpApp(document_id, chapter_id) {
         correct += this.questions[i].right_answer === this.answers[i];
       }
       this.testScore = Math.floor(correct * 100 / total);
+      this.testScoreText = correct + '/' + total;
       let params = {
         "score": this.testScore,
         "words_per_minute": this.readingConfig.words_per_minute

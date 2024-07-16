@@ -1,10 +1,12 @@
 import os
 
 import pypdf
+from bs4 import BeautifulSoup
+from ebooklib import ITEM_NAVIGATION, epub
 
 
 class DocumentReader:
-    SUPPORTED_EXTENSIONS = ["pdf", "txt"]
+    SUPPORTED_EXTENSIONS = ["pdf", "txt", "epub"]
 
     def __init__(self, path):
         self.path = f"files/{path}"
@@ -13,7 +15,7 @@ class DocumentReader:
 
     def validate_file_extension(self, path):
         if self.extension not in self.SUPPORTED_EXTENSIONS:
-            raise Exception(f"The file extension {extension} is not supported.")
+            raise Exception(f"The file extension {self.extension} is not supported.")
 
     def process_pdf_outline(self, outline):
         toc = []
@@ -32,7 +34,24 @@ class DocumentReader:
                 outline = reader.outline
                 toc = self.process_pdf_outline(outline)
         elif self.extension == "txt":
-            return []
+            toc = []
+        elif self.extension == "epub":
+            book = epub.read_epub(self.path)
+            nav_items = [
+                item for item in book.get_items() if item.get_type() == ITEM_NAVIGATION
+            ]
+            if nav_items:
+                nav_item = nav_items[0]
+            else:
+                return []
+            soup = BeautifulSoup(nav_item.get_content(), features="xml")
+            nav_points = soup.navMap.find_all("navPoint")
+            for np in nav_points:
+                link = np.content.attrs["src"]
+                title = np.navLabel.get_text().strip()
+                chapter = book.get_item_with_href(link)
+                if title and chapter:
+                    toc.append({"title": title, "chapter": chapter})
         return toc
 
     def get_chapter_titles(self):
@@ -43,6 +62,9 @@ class DocumentReader:
                 titles.append({"id": i, "title": chapter.title})
         elif self.extension == "txt":
             return []
+        elif self.extension == "epub":
+            for i, chapter in enumerate(chapters):
+                titles.append({"id": i, "title": chapter["title"]})
         return titles
 
     async def get_chapter_content(self, chapter_id):
@@ -68,6 +90,9 @@ class DocumentReader:
         elif self.extension == "txt":
             with open(self.path, "r") as f:
                 return f.read()
+        elif self.extension == "epub":
+            chapter = self.get_chapters()[chapter_id]["chapter"]
+            return BeautifulSoup(chapter.get_content()).get_text()
         return text
 
     async def get_content(self):
