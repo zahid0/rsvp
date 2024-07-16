@@ -5,11 +5,11 @@ services:
     volumes:
       - .:/app
     command: uvicorn main:app --host=0.0.0.0 --reload
-    # command: sleep infinity
     ports:
       - 8000:8000
     environment:
       - DATABASE_URL=postgresql+asyncpg://rsvp:r2d2@postgres/rsvp
+      - LLM_MODEL=groq/mixtral-8x7b-32768
       - GROQ_API_KEY
   postgres:
     image: postgres

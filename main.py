@@ -18,7 +18,7 @@ from document_reader import DocumentReader
 
 # models.Base.metadata.create_all(bind=database.engine)
 
-MODEL = "groq/mixtral-8x7b-32768"
+MODEL = os.getenv("LLM_MODEL")
 MAX_TOKENS = 2048
 SYSTEM_PROMPT = "You are an assistant designed to create comprehensive questionnaires to evaluate the knowledge and understanding of students on a specific subject. Your questions should be well-structured, thought-provoking, and tailored to the learning objective. Your goal is to foster critical thinking and deeper understanding."
 app = FastAPI()
