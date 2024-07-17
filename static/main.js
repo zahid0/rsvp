@@ -283,9 +283,17 @@ function rsvpApp(document_id, chapter_id) {
         this.saveProgress();
         this.finished = true;
       } else {
-        const endIdx = this.dynIndex + this.readingConfig.number_of_words;
+        let endIdx = this.dynIndex + this.readingConfig.number_of_words;
+        let endIdxOffset = 0;
+        for (let i = this.dynIndex; i <= endIdx; i++) {
+          if (this.words[i] === "<br>") {
+            endIdx = i;
+            endIdxOffset = 1;
+            break;
+          }
+        }
         this.rsvpText = this.words.slice(this.dynIndex, endIdx).join(' ');
-        this.dynIndex = endIdx;
+        this.dynIndex = endIdx + endIdxOffset;
       }
     },
 

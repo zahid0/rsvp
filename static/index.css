@@ -119,6 +119,7 @@ a:hover {
 #rsvp {
   position: absolute;
   left: 50%;
+  text-align: center;
   top: 50%;
   transform: translate(-50%, -50%);
 }

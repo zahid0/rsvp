@@ -80,7 +80,7 @@ async def get_document(id: int, db: AsyncSession = Depends(database.get_db)):
 
 
 @app.get("/api/documents/{document_id}/content")
-async def get_chapter_content(
+async def get_content(
     document_id: int,
     words_per_minute: int,
     sprint_minutes: int,
