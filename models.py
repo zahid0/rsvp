@@ -23,6 +23,7 @@ class ReadingConfig(Base):
     ramp_step = Column(Integer, default=50)
     step_ups = Column(Integer, default=6)
     step_downs = Column(Integer, default=4)
+    sprint_count = Column(Integer, default=0)
 
 
 class ReadingProgress(Base):
@@ -32,6 +33,7 @@ class ReadingProgress(Base):
     document_id = Column(Integer, ForeignKey("documents.id", ondelete="CASCADE"))
     chapter_id = Column(Integer, nullable=True)
     word_index = Column(Integer, nullable=True)
+    total_words = Column(Integer, nullable=True)
 
     document = relationship("Document", backref="reading_progresses")
 

@@ -76,6 +76,20 @@ async def get_document(id: int, db: AsyncSession = Depends(database.get_db)):
         raise HTTPException(status_code=404, detail="Document not found")
     doc_reader = DocumentReader(doc.path)
     chapters = doc_reader.get_chapter_titles()
+    reading_progresses = await db.execute(
+        select(models.ReadingProgress).where(
+            models.ReadingProgress.document_id == id,
+        )
+    )
+    chapter_progress = {}
+    for rp in reading_progresses.scalars():
+        if rp.total_words and rp.chapter_id:
+            chapter_progress[rp.chapter_id] = int(rp.word_index * 100 / rp.total_words)
+    for ch in chapters:
+        if ch["id"] in chapter_progress:
+            ch["progress"] = chapter_progress[ch["id"]]
+        else:
+            ch["progress"] = 0
     return {"id": doc.id, "path": doc.path, "chapters": chapters}
 
 
@@ -124,6 +138,7 @@ async def get_content(
         "start_index": start_index,
         "next_index": end_index,
         "total_words": total_words,
+        "title": doc.path,
     }
 
 

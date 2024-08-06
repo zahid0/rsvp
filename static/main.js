@@ -36,7 +36,7 @@ function main() {
 
 function listingPage() {
   return {
-  documents: [],
+    documents: [],
     showAddForm: false,
     currentTab: 'file-upload',
     title: '',
@@ -75,7 +75,7 @@ function listingPage() {
     },
     confirmDelete: function (docId) {
       if (confirm('Are you sure you want to delete this document?')) {
-          this.deleteDocument(docId); // Call the delete API or function
+        this.deleteDocument(docId); // Call the delete API or function
       }
     },
     deleteDocument: async function(docId) {
@@ -90,7 +90,7 @@ function listingPage() {
 function documentData() {
   return {
     chapters: [],
-    doc_title: '',
+    doc_title: 'Doc',
     document_id: null,
 
     init () {
@@ -108,10 +108,13 @@ function documentData() {
     },
 
     async fetchDocument() {
-        const response = await fetch('/api/documents/' + this.document_id);
-        const data = await response.json();
-        this.chapters = data.chapters;
-        this.doc_title = data.path;
+      const response = await fetch('/api/documents/' + this.document_id);
+      const data = await response.json();
+      this.chapters = data.chapters;
+      this.doc_title = data.path;
+      if (this.chapters.length === 0) {
+        this.navigateToReader(null);
+      }
     }
   }
 }
@@ -120,12 +123,14 @@ function documentData() {
 function rsvpApp(document_id, chapter_id) {
   return {
     document_id: null,
+    doc_title: '',
     chapter_id: null,
     readingConfig: {},
     readingProgress: {
       document_id: null,
       chapter_id: null,
       word_index: 0,
+      total_words: 0,
       id: null
     },
     words: [],
@@ -138,7 +143,6 @@ function rsvpApp(document_id, chapter_id) {
     finished: false,
     next_index: 0,
     start_index: 0,
-    sprint_count: 0,
     questions: [],
     answers: [],
     testSubmitted: false,
@@ -170,9 +174,9 @@ function rsvpApp(document_id, chapter_id) {
     },
 
     updateSprint() {
-      this.sprint_count++;
-      this.sprint_count %= (this.readingConfig.step_ups + this.readingConfig.step_downs);
-      if (this.sprint_count < this.readingConfig.step_ups) {
+      this.readingConfig.sprint_count++;
+      this.readingConfig.sprint_count %= (this.readingConfig.step_ups + this.readingConfig.step_downs);
+      if (this.readingConfig.sprint_count < this.readingConfig.step_ups) {
         this.readingConfig.words_per_minute += this.readingConfig.ramp_step;
       } else {
         this.readingConfig.words_per_minute -= this.readingConfig.ramp_step;
@@ -181,21 +185,21 @@ function rsvpApp(document_id, chapter_id) {
     },
 
     async saveReadingConfig() {
-        try {
-            const response = await fetch('/api/reading_configs/' + this.readingConfig.id, {
-                method: 'PUT',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify(this.readingConfig),
-            });
+      try {
+        const response = await fetch('/api/reading_configs/' + this.readingConfig.id, {
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(this.readingConfig),
+        });
 
-            if (!response.ok) {
-                throw new Error(`HTTP error! status: ${response.status}`);
-            }
-        } catch (error) {
-            console.error('Error saving reading config:', error);
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
         }
+      } catch (error) {
+        console.error('Error saving reading config:', error);
+      }
     },
 
     async resetProgress() {
@@ -205,23 +209,23 @@ function rsvpApp(document_id, chapter_id) {
     },
 
     async saveProgress() {
-        try {
-            this.readingProgress.word_index = this.next_index;
-            const response = await fetch('/api/reading_progress/', {
-                method: 'PUT',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify(this.readingProgress),
-            });
+      try {
+        this.readingProgress.word_index = this.next_index;
+        const response = await fetch('/api/reading_progress/', {
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(this.readingProgress),
+        });
 
-            if (!response.ok) {
-                throw new Error(`HTTP error! status: ${response.status}`);
-            }
-            const data = await response.json();
-        } catch (error) {
-            console.error('Error saving reading config:', error);
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
         }
+        const data = await response.json();
+      } catch (error) {
+        console.error('Error saving reading config:', error);
+      }
     },
 
     async fetchWords() {
@@ -229,23 +233,25 @@ function rsvpApp(document_id, chapter_id) {
         this.fetchingWords = true;
         this.finished = false;
         while (typeof this.readingConfig.words_per_minute === 'undefined') {
-            await new Promise(resolve => setTimeout(resolve, 1000));
+          await new Promise(resolve => setTimeout(resolve, 1000));
         }
         let params = {
-            'words_per_minute': this.readingConfig.words_per_minute,
-            'sprint_minutes': this.readingConfig.sprint_minutes
+          'words_per_minute': this.readingConfig.words_per_minute,
+          'sprint_minutes': this.readingConfig.sprint_minutes
         };
         if (this.chapter_id !== null) {
-            params['chapter_id'] = this.chapter_id;
+          params['chapter_id'] = this.chapter_id;
         }
         let query = new URLSearchParams(params);
         let url = '/api/documents/' + this.document_id + '/content/?' + query;
         const response = await fetch(url);
         const data = await response.json();
         this.words = data.content;
+        this.doc_title = data.title;
         this.next_index = data.next_index;
         this.start_index = data.start_index;
         this.setupWordDisplay();
+        this.readingProgress.total_words = data.total_words;
         if (data.next_index === null) {
           this.progress_bar_percentage = 100;
         } else {
@@ -333,9 +339,6 @@ function rsvpApp(document_id, chapter_id) {
       this.setupWordDisplay();
     },
 
-    backToDoc() {
-      window.location.href = '/documents/' + this.document_id;
-    },
 
     async loadTest() {
       fetch('/static/views/test.html')
@@ -347,36 +350,36 @@ function rsvpApp(document_id, chapter_id) {
     },
 
     testParams() {
-        let params = {
-            'document_id': this.document_id,
-            'start_index': this.start_index
-        };
+      let params = {
+        'document_id': this.document_id,
+        'start_index': this.start_index
+      };
 
-        if (this.chapter_id !== null) {
-            params['chapter_id'] = this.chapter_id;
-        }
-        if (this.next_index !== null) {
-            params['end_index'] = this.next_index;
-        }
-        return params
+      if (this.chapter_id !== null) {
+        params['chapter_id'] = this.chapter_id;
+      }
+      if (this.next_index !== null) {
+        params['end_index'] = this.next_index;
+      }
+      return params
     },
 
     async fetchQuestions() {
-        this.fetchingQuestions = true;
-        let params = this.testParams();
-        let query = new URLSearchParams(params);
-        const response = await fetch('/api/test/?' + query);
-        if (!response.ok) {
-          this.fetchingQuestions = false;
-          this.fetchingQuestionFailed = true;
-          return;
-        }
-        const data = await response.json();
-        for (let i = 0; i < data.length; i++) {
-          this.answers.push('');
-        }
-        this.questions = data;
+      this.fetchingQuestions = true;
+      let params = this.testParams();
+      let query = new URLSearchParams(params);
+      const response = await fetch('/api/test/?' + query);
+      if (!response.ok) {
         this.fetchingQuestions = false;
+        this.fetchingQuestionFailed = true;
+        return;
+      }
+      const data = await response.json();
+      for (let i = 0; i < data.length; i++) {
+        this.answers.push('');
+      }
+      this.questions = data;
+      this.fetchingQuestions = false;
     },
 
     removeModal() {
@@ -402,15 +405,15 @@ function rsvpApp(document_id, chapter_id) {
         "words_per_minute": this.readingConfig.words_per_minute
       };
       const response = await fetch('/api/test_score', {
-          method: 'POST',
-          headers: {
-              'Content-Type': 'application/json',
-          },
-          body: JSON.stringify(params),
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(params),
       });
 
       if (!response.ok) {
-          throw new Error(`HTTP error! status: ${response.status}`);
+        throw new Error(`HTTP error! status: ${response.status}`);
       }
       this.testSubmitted = true;
     }

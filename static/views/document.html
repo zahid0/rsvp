@@ -1,12 +1,21 @@
 <main x-data="documentData" x-init="init">
-  <ul id="documentDetail">
-    <li x-show="chapters.length === 0">
-      <a :href="'#/documents/' + document_id + '/read'" class="text-blue-500" x-text="doc_title" @click.prevent="navigateToReader(null)"></a>
-    </li>
-    <template x-for="chapter in chapters" :key="chapter.id">
-      <li >
-        <a :href="'#/documents/' + document_id + '/read/chapters/' + chapter.id" class="text-blue-500" x-text="chapter.title" @click.prevent="navigateToReader(chapter.id)"></a>
-      </li>
-    </template>
-  </ul>
+  <table>
+    <thead>
+      <tr>
+        <th>Title</th>
+        <th>Progress</th>
+      </tr>
+    </thead>
+    <tbody>
+      <template x-for="chapter in chapters" :key="chapter.id">
+        <tr>
+          <td>
+            <a :href="'#/documents/' + document_id + '/read/chapters/' + chapter.id" class="text-blue-500" x-text="chapter.title" @click.prevent="navigateToReader(chapter.id)"></a>
+          </td>
+          <!-- If progress is a property of the chapter object, then 'chapter.progress' will give its value -->
+          <td x-text="chapter.progress ? chapter.progress + '%' : '0%'"></td>
+        </tr>
+      </template>
+    </tbody>
+  </table>
 </main>

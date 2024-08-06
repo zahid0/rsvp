@@ -19,6 +19,7 @@ class DocumentCreate(BaseModel):
 class Chapter(BaseModel):
     id: int
     title: str
+    progress: int
 
 
 class DocumentDetail(BaseModel):
@@ -36,6 +37,7 @@ class ReadingConfig(BaseModel):
     ramp_step: int
     step_ups: int
     step_downs: int
+    sprint_count: int
 
 
 class ReadingProgress(BaseModel):
@@ -43,6 +45,7 @@ class ReadingProgress(BaseModel):
     document_id: int
     chapter_id: Optional[int] = None
     word_index: Optional[int] = None
+    total_words: Optional[int] = None
 
 
 class Question(BaseModel):

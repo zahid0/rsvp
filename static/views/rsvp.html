@@ -3,16 +3,19 @@
 <div x-cloak x-show="!playing" aria-label="Breadcrumb">
   <ul class="breadcrumb-list">
     <li>
-        <a href="/" class="breadcrumb-link">
+        <a href="/" class="breadcrumb-link" @click.prevent="window.location.hash = '';">
           <span >Home</span>
         </a>
       <span class="breadcrumb-separator">&#62;</span>
     </li>
     <li>
-        <a :href="'#/documents/' + document_id" class="breadcrumb-link">
-          <span >Doc</span>
+        <a :href="'#/documents/' + document_id" class="breadcrumb-link" @click.prevent="window.location.hash = '#/documents/' + document_id;">
+          <span x-text="doc_title"></span>
         </a>
+      <span class="breadcrumb-separator">&#62;</span>
     </li>
+    <li>
+      <span>Reading</span>
   </ul>
 </div>
 
@@ -58,7 +61,6 @@
 <p x-show="playing" id="rsvp" x-html="rsvpText"></p>
 
 <div class="buttonContainer">
-  <input x-show="!playing" type="button" id="backToDock" value="Back to Doc" @click="backToDoc">
   <input x-show="!playing" type="button" id="resetProgress" value="Start from Beginning" @click="resetProgress">
   <input type="button" id="playPause" :value="playing ? 'Pause' : 'Play'" @click="togglePlayPause" x-on:keydown.space.prevent>
   <input x-show="finished" type="button" id="nextChunk" :value="next_index === null ? 'Done! Re-read' : 'Fetch Next Chuck'" @click="fetchNextChunk">
