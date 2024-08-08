@@ -105,4 +105,12 @@ class DocumentReader:
         elif self.extension == "txt":
             with open(self.path, "r") as f:
                 return f.read()
+        elif self.extension == "epub":
+            book = epub.read_epub(self.path)
+            items = [
+                item for item in book.get_items() if item.file_name.endswith(".html")
+            ]
+            return "\n".join(
+                [BeautifulSoup(item.get_content()).get_text().strip() for item in items]
+            )
         return text
