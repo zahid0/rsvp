@@ -17,3 +17,8 @@ services:
       - POSTGRES_PASSWORD=r2d2
       - POSTGRES_DB=rsvp
       - POSTGRES_USER=rsvp
+    volumes:
+      - db-data:/var/lib/postgresql/data
+
+volumes:
+  db-data:
