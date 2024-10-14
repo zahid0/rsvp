@@ -1,50 +1,45 @@
 function main() {
   return {
-    init() {
-      this.route();
-      window.addEventListener('hashchange', () => this.route());
-    },
-
-    route() {
-      if (window.location.hash === ''){
-        fetch('/static/views/listing.html')
-          .then(response => response.text())
-          .then(html => {
-            const mainElement = document.querySelector('#main');
-            if (mainElement) {
-              mainElement.innerHTML = html;
-            }
-          });
-      } else if (window.location.hash.match(/^#\/documents\/\d+$/)) {
-        fetch("/static/views/document.html")
-          .then(response => response.text())
-          .then(data => {
-            const mainElement = document.querySelector("#main");
-            mainElement.innerHTML = data;
-          });
-      } else if (window.location.hash.match(/^#\/documents\/\d+\/read(\/chapters\/\d+)?$/)) {
-        fetch("/static/views/rsvp.html")
-          .then(response => response.text())
-          .then(data => {
-            const main = document.querySelector("#main");
-            main.innerHTML = data;
-          });
-      }
-    }
-  }
-}
-
-function listingPage() {
-  return {
     documents: [],
     showAddForm: false,
     currentTab: 'file-upload',
     title: '',
     content: '',
+    chapters: [],
+    doc_title: 'Doc',
+    document_id: null,
+    doc_title: '',
+    chapter_id: null,
+    readingConfig: {},
+    readingProgress: {
+      document_id: null,
+      chapter_id: null,
+      word_index: 0,
+      total_words: 0,
+      id: null
+    },
+    words: [],
+    fetchingWords: false,
+    dynIndex: 0,
+    intervalId: null,
+    playing: false,
+    fullTextDisplay: '',
+    rsvpText: '',
+    finished: false,
+    next_index: 0,
+    start_index: 0,
+    questions: [],
+    answers: [],
+    testSubmitted: false,
+    testScore: null,
+    testScoreText: '',
+    progress_bar_percentage: 0,
+    progressDone: 0,
+    fetchingQuestionFailed: false,
 
-    navigateToDocument(document_id) {
-      window.location.hash = '#/documents/' + document_id;
-      window.history.replaceState({}, '', window.location.href);
+    init: async function(){
+      this.fetchDocuments();
+      this.fetchReadingConfig();
     },
 
     fetchDocuments: async function() {
@@ -83,28 +78,18 @@ function listingPage() {
       if (response.ok) {
         this.fetchDocuments();
       }
-    }
-  }
-}
+    },
 
-function documentData() {
-  return {
-    chapters: [],
-    doc_title: 'Doc',
-    document_id: null,
-
-    init () {
-      this.document_id = Number(window.location.hash.split('/')[2]);
+    selectDocument (document_id) {
+      this.document_id = document_id;
       this.fetchDocument();
     },
 
-    navigateToReader(chapter_id) {
-      let reader_url = '#/documents/' + this.document_id + '/read';
-      if (chapter_id !== null) {
-        reader_url += '/chapters/' + chapter_id;
-      }
-      window.location.hash = reader_url;
-      window.history.replaceState({}, '', window.location.href);
+    selectChapter(chapter_id) {
+        this.chapter_id = chapter_id;
+      this.readingProgress.document_id = this.document_id;
+      this.readingProgress.chapter_id = this.chapter_id;
+      this.fetchWords();
     },
 
     async fetchDocument() {
@@ -113,54 +98,8 @@ function documentData() {
       this.chapters = data.chapters;
       this.doc_title = data.path;
       if (this.chapters.length === 0) {
-        this.navigateToReader(null);
+        this.selectChapter(null);
       }
-    }
-  }
-}
-
-
-function rsvpApp(document_id, chapter_id) {
-  return {
-    document_id: null,
-    doc_title: '',
-    chapter_id: null,
-    readingConfig: {},
-    readingProgress: {
-      document_id: null,
-      chapter_id: null,
-      word_index: 0,
-      total_words: 0,
-      id: null
-    },
-    words: [],
-    fetchingWords: false,
-    dynIndex: 0,
-    intervalId: null,
-    playing: false,
-    fullTextDisplay: '',
-    rsvpText: '',
-    finished: false,
-    next_index: 0,
-    start_index: 0,
-    questions: [],
-    answers: [],
-    testSubmitted: false,
-    testScore: null,
-    testScoreText: '',
-    progress_bar_percentage: 0,
-    progressDone: 0,
-    fetchingQuestionFailed: false,
-
-    init() {
-      this.document_id = Number(window.location.hash.split('/')[2]);
-      if (window.location.hash.split('/').length === 6) {
-        this.chapter_id = Number(window.location.hash.split('/')[5]);
-      }
-      this.readingProgress.document_id = this.document_id;
-      this.readingProgress.chapter_id = this.chapter_id;
-      this.fetchReadingConfig();
-      this.fetchWords();
     },
 
     async fetchReadingConfig() {
@@ -417,6 +356,5 @@ function rsvpApp(document_id, chapter_id) {
       }
       this.testSubmitted = true;
     }
-
   }
 }

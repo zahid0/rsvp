@@ -9,7 +9,7 @@ class Document(BaseModel):
     path: str
 
     class Config:
-        orm_mode = True
+        from_attributes = True
 
 
 class DocumentCreate(BaseModel):

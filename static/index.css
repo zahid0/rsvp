@@ -1,5 +1,35 @@
+.body {
+  height: 100%;
+}
 
-/* Header styles */
+.container {
+  display: grid;
+  height: 100%;
+  grid-gap: 1px;
+  grid-template-columns: repeat(3, minmax(200px, 1fr));
+  grid-template-rows: 40px 1fr;
+}
+
+.header {
+  grid-column: 1 / -1;
+  border: 2px solid black;
+}
+
+.documents {
+  border: 2px solid black;
+  overflow-y: auto;
+}
+
+.chapters {
+  border: 2px solid black;
+  overflow-y: auto;
+}
+
+.content {
+  border: 2px solid black;
+  overflow-y: auto;
+}
+
 header {
     background-color: #ffffff;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);

@@ -8,3 +8,4 @@ pypdf
 litellm
 ebooklib
 beautifulsoup4
+python-multipart
