@@ -2,6 +2,7 @@ function main() {
   return {
     documents: [],
     showAddForm: false,
+    showSettings: false,
     currentTab: 'file-upload',
     title: '',
     content: '',
@@ -139,6 +140,7 @@ function main() {
       } catch (error) {
         console.error('Error saving reading config:', error);
       }
+      this.showSettings = false;
     },
 
     async resetProgress() {
@@ -263,8 +265,6 @@ function main() {
     },
 
     playRsvp() {
-      this.saveReadingConfig();
-
       this.initRsvp();
       this.playing = true;
       this.finished = false;

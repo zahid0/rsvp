@@ -147,11 +147,7 @@ a:hover {
 }
 
 #rsvp {
-  position: absolute;
-  left: 50%;
   text-align: center;
-  top: 50%;
-  transform: translate(-50%, -50%);
 }
 
 #formAndText {
@@ -260,7 +256,7 @@ input[type="button"]:hover {
     border: solid 1px #999;
     border-radius: 8px;
     box-shadow: 0px 0px 20px 0px rgba(0, 0, 0, 0.3);
-    background-color: white;
+    background-color: #F5E1A4;
     padding: 20px;
 
     /* Animate when opening */
