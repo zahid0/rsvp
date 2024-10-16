@@ -77,21 +77,21 @@ async def get_document(id: int, db: AsyncSession = Depends(database.get_db)):
     doc_reader = DocumentReader(doc.path)
     chapters = doc_reader.get_chapter_titles()
     reading_progresses = await db.execute(
-        select(models.ReadingProgress).where(
-            models.ReadingProgress.document_id == id,
-        )
+        select(models.ReadingProgress).where(models.ReadingProgress.document_id == id)
     )
     chapter_progress = {}
     for rp in reading_progresses.scalars():
         if rp.word_index is None:
-            chapter_progress[rp.chapter_id] = 100
+            progress = 100
         elif rp.total_words and rp.chapter_id:
-            chapter_progress[rp.chapter_id] = int(rp.word_index * 100 / rp.total_words)
+            progress = int(rp.word_index * 100 / rp.total_words)
+        chapter_progress[rp.chapter_id] = {
+            "progress": progress,
+            "updated_at": rp.updated_at,
+        }
     for ch in chapters:
         if ch["id"] in chapter_progress:
-            ch["progress"] = chapter_progress[ch["id"]]
-        else:
-            ch["progress"] = 0
+            ch.update(chapter_progress[ch["id"]])
     return {"id": doc.id, "path": doc.path, "chapters": chapters}
 
 
@@ -197,8 +197,8 @@ async def update_reading_progress(
 ):
     query = await db.execute(
         select(models.ReadingProgress).where(
-            (models.ReadingProgress.document_id == reading_progress.document_id) &
-            (models.ReadingProgress.chapter_id == reading_progress.chapter_id)
+            (models.ReadingProgress.document_id == reading_progress.document_id)
+            & (models.ReadingProgress.chapter_id == reading_progress.chapter_id)
         )
     )
     reading_progress_obj = query.scalar()

@@ -82,25 +82,38 @@ function main() {
     },
 
     selectDocument (document_id) {
-      this.document_id = document_id;
-      this.fetchDocument();
+      this.fetchDocument(document_id);
     },
 
     selectChapter(chapter_id) {
-        this.chapter_id = chapter_id;
+      this.chapter_id = chapter_id;
       this.readingProgress.document_id = this.document_id;
       this.readingProgress.chapter_id = this.chapter_id;
       this.fetchWords();
     },
 
-    async fetchDocument() {
-      const response = await fetch('/api/documents/' + this.document_id);
+    async fetchDocument(document_id) {
+      const response = await fetch('/api/documents/' + document_id);
+      if (!response.ok) {
+        throw new Error('Network response was not ok');
+      }
+      this.document_id = document_id;
       const data = await response.json();
       this.chapters = data.chapters;
       this.doc_title = data.path;
       if (this.chapters.length === 0) {
-        this.selectChapter(null);
+        return this.selectChapter(null);
       }
+      let updatedChapters = this.chapters.filter(chapter => chapter.updated_at !== null).sort((a, b) => (new Date(b.updated_at) - new Date(a.updated_at)));
+      if (updatedChapters.length > 0) {
+        return this.selectChapter(updatedChapters[0].id);
+      }
+      let inProgressChapters = this.chapters.filter(chapter => chapter.progress !== 100);
+      if (inProgressChapters.length > 0) {
+        selectedChapter = inProgressChapters[0];
+        return this.selectChapter(inProgressChapters[0].id);
+      }
+      this.selectChapter(this.chapters[0].id);
     },
 
     async fetchReadingConfig() {
@@ -241,6 +254,7 @@ function main() {
         }
         this.rsvpText = this.words.slice(this.dynIndex, endIdx).join(' ');
         this.dynIndex = endIdx + endIdxOffset;
+        this.progressDone = 100 * (this.start_index + this.dynIndex) / this.readingProgress.total_words;
       }
     },
 
@@ -283,7 +297,7 @@ function main() {
       fetch('/static/views/test.html')
         .then(response => response.text())
         .then(html => {
-          const rsvpElement = document.querySelector('#rsvpReader');
+          const rsvpElement = document.querySelector('#main');
           rsvpElement.insertAdjacentHTML('beforeend', html);
         });
     },

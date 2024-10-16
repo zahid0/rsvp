@@ -1,13 +1,16 @@
-.body {
-  height: 100%;
+body {
+  height: 100vh;
+  background-color: #F5E1A4;
 }
 
 .container {
   display: grid;
   height: 100%;
+  width: 100%;
   grid-gap: 1px;
   grid-template-columns: repeat(3, minmax(200px, 1fr));
-  grid-template-rows: 40px 1fr;
+  grid-template-rows: 40px 60px 1fr 40px;
+  margin: 0;
 }
 
 .header {
@@ -16,18 +19,33 @@
 }
 
 .documents {
-  border: 2px solid black;
+  grid-row: 2 / -1;
   overflow-y: auto;
+  border: 2px solid black;
 }
 
 .chapters {
+  grid-row: 2 / -1;
   border: 2px solid black;
   overflow-y: auto;
 }
 
+.content-controls {
+  grid-column: 3 / -1;
+  grid-row: 2 / 3;
+}
+
 .content {
+  grid-column: 3 / -1;
+  grid-row: 3 / 4;
   border: 2px solid black;
   overflow-y: auto;
+}
+
+.content-progress {
+  grid-column: 3 / -1;
+  grid-row: 4 / -1;
+  border: 2px solid black;
 }
 
 header {
@@ -150,7 +168,7 @@ a:hover {
   text-align: center;
 }
 
-#formAndText {
+.content {
   text-align: center;
   padding: 50px;
   background-color: #f8f9fa;
@@ -191,12 +209,8 @@ input[type="button"]:hover {
 }
 
 #fulltextdisplay {
-  overflow: auto;
-  border: 1px solid #000;
-  text-align: left;
-  width: 100%;
-  max-height: 400px;
-  box-sizing: border-box;
+  overflow-y: auto;
+  flex: 1;
 }
 
 #fulltextdisplay span {
@@ -338,4 +352,8 @@ input[type="button"]:hover {
     color: red;
     cursor: pointer;
     transition: color 0.3s;
+}
+
+.selected {
+  background-color: #EDF7FA;
 }

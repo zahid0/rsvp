@@ -34,6 +34,7 @@ class ReadingProgress(Base):
     chapter_id = Column(Integer, nullable=True)
     word_index = Column(Integer, nullable=True)
     total_words = Column(Integer, nullable=True)
+    updated_at = Column(DateTime(timezone=True), onupdate=func.now())
 
     document = relationship("Document", backref="reading_progresses")
 

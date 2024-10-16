@@ -1,3 +1,4 @@
+from datetime import datetime
 from typing import List, Optional
 
 from fastapi import UploadFile
@@ -19,7 +20,8 @@ class DocumentCreate(BaseModel):
 class Chapter(BaseModel):
     id: int
     title: str
-    progress: int
+    progress: Optional[int] = None
+    updated_at: Optional[datetime] = None
 
 
 class DocumentDetail(BaseModel):
