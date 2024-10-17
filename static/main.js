@@ -104,16 +104,15 @@ function main() {
       if (this.chapters.length === 0) {
         return this.selectChapter(null);
       }
-      let updatedChapters = this.chapters.filter(chapter => chapter.updated_at !== null).sort((a, b) => (new Date(b.updated_at) - new Date(a.updated_at)));
+      let inProgressChapters = this.chapters.filter(chapter => chapter.progress !== 100);
+      if (inProgressChapters.length === 0) {
+        return this.selectChapter(this.chapters[0].id);
+      }
+      let updatedChapters = inProgressChapters.filter(chapter => chapter.updated_at !== null).sort((a, b) => (new Date(b.updated_at) - new Date(a.updated_at)));
       if (updatedChapters.length > 0) {
         return this.selectChapter(updatedChapters[0].id);
       }
-      let inProgressChapters = this.chapters.filter(chapter => chapter.progress !== 100);
-      if (inProgressChapters.length > 0) {
-        selectedChapter = inProgressChapters[0];
-        return this.selectChapter(inProgressChapters[0].id);
-      }
-      this.selectChapter(this.chapters[0].id);
+      return this.selectChapter(inProgressChapters[0].id);
     },
 
     async fetchReadingConfig() {
@@ -127,9 +126,9 @@ function main() {
     },
 
     updateSprint() {
-      this.readingConfig.sprint_count++;
       this.readingConfig.sprint_count %= (this.readingConfig.step_ups + this.readingConfig.step_downs);
-      if (this.readingConfig.sprint_count < this.readingConfig.step_ups) {
+      this.readingConfig.sprint_count++;
+      if (this.readingConfig.sprint_count <= this.readingConfig.step_ups) {
         this.readingConfig.words_per_minute += this.readingConfig.ramp_step;
       } else {
         this.readingConfig.words_per_minute -= this.readingConfig.ramp_step;
@@ -177,6 +176,10 @@ function main() {
           throw new Error(`HTTP error! status: ${response.status}`);
         }
         const data = await response.json();
+        if (this.chapter_id) {
+          let current_chapter = this.chapters.filter(chapter => chapter.id === this.chapter_id)[0];
+          current_chapter.progress = Math.floor(this.progressDone);
+        }
       } catch (error) {
         console.error('Error saving reading config:', error);
       }
@@ -260,7 +263,11 @@ function main() {
 
     async fetchNextChunk() {
       this.updateSprint();
-      this.fetchWords();
+      if (this.next_index === null) {
+        this.selectDocument(this.document_id);
+      } else {
+        this.fetchWords();
+      }
     },
 
     initRsvp() {

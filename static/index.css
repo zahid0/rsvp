@@ -9,8 +9,8 @@ body {
   width: 100%;
   grid-gap: 1px;
   grid-template-columns: repeat(3, minmax(200px, 1fr));
-  grid-template-rows: 40px 60px 1fr 40px;
-  margin: 0;
+  grid-template-rows: 40px 1fr 40px 60px;
+  padding: 3px;
 }
 
 .header {
@@ -19,33 +19,37 @@ body {
 }
 
 .documents {
-  grid-row: 2 / -1;
+  grid-row: 2 / 3;
   overflow-y: auto;
   border: 2px solid black;
 }
 
 .chapters {
-  grid-row: 2 / -1;
+  grid-row: 2 / 3;
   border: 2px solid black;
   overflow-y: auto;
 }
 
-.content-controls {
-  grid-column: 3 / -1;
-  grid-row: 2 / 3;
-}
-
 .content {
   grid-column: 3 / -1;
-  grid-row: 3 / 4;
+  grid-row: 2 / 3;
   border: 2px solid black;
   overflow-y: auto;
 }
 
 .content-progress {
-  grid-column: 3 / -1;
-  grid-row: 4 / -1;
+  grid-column: 1 / -1;
+  grid-row: 3 / 4;
+  height: 20px;
+  width: 100%;
+  margin: 3px;
+  position:relative;
   border: 2px solid black;
+}
+
+.content-controls {
+  grid-column: 1 / -1;
+  grid-row: 4 / 5;
 }
 
 header {
@@ -200,7 +204,6 @@ input[type="button"]:hover {
 .buttonContainer {
   display: flex;
   justify-content: center;
-  margin-top: 20px;
 }
 
 /* Style the buttons within the container */
