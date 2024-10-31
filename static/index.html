@@ -27,7 +27,8 @@
             <template x-for="doc in documents" :key="doc.id">
               <li :class="{ 'selected': document_id === doc.id }">
                 <a :href="'#/documents/' + doc.id" class="text-blue-500" x-text="doc.path" @click.prevent="selectDocument(doc.id)"></a>
-                <i class="delete-button" @click="confirmDelete(doc.id)"></i>
+                <i class="delete-button" @click="confirmDelete(doc.id)">&times;</i>
+                <i x-show="doc.id === document_id" class="delete-button" @click="confirmReset(doc.id)">&#x1F504;</i>
               </li>
             </template>
           </ul>
@@ -59,9 +60,9 @@
         <p x-show="!fetchingWords" id="fulltextdisplay" x-html="fullTextDisplay"></p>
         <img x-show="fetchingWords" alt="Result loading..." width="150" src="/static/loader.svg"/>
       </div>
-      <div class="content-progress" x-show="document_id && !fetchingWords">
-        <div :style="'width: ' + progress_bar_percentage + '%; height: 100%; background-color: yellow; position: absolute;'" aria-valuemin="0" aria-valuemax="100" :aria-valuenow="progress_bar_percentage"></div>
-        <div :style="'width: ' + progressDone + '%; height: 100%; background-color: green; position: absolute;'" aria-valuemin="0" aria-valuemax="100" :aria-valuenow="progressDone"></div>
+      <div class="content-progress">
+        <div class="progress-buffered" :style="'width: ' + progress_bar_percentage + '%;'"></div>
+        <div class="progress-played" :style="'width: ' + progressDone + '%;'"></div>
       </div>
       <div x-show="document_id" class="buttonContainer content-controls">
         <input type="button" id="resetProgress" value="Start from Beginning" @click="resetProgress">

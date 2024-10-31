@@ -69,6 +69,17 @@ function main() {
         this.fetchDocuments();
       }
     },
+    confirmReset: function (docId) {
+      if (confirm('Are you sure you want to reset all progress for this document?')) {
+        this.resetDocProgress(docId);
+      }
+    },
+    resetDocProgress: async function(docId) {
+      let response = await fetch('/api/documents/' + docId + '/reading_progress', {method: 'DELETE'});
+      if (response.ok && this.document_id === docId) {
+        this.selectDocument(docId);
+      }
+    },
     confirmDelete: function (docId) {
       if (confirm('Are you sure you want to delete this document?')) {
         this.deleteDocument(docId); // Call the delete API or function

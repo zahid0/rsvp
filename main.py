@@ -4,10 +4,12 @@ import os
 from typing import List, Optional
 
 from fastapi import Depends, FastAPI, HTTPException, Request, UploadFile
+from fastapi import Response, status
 from fastapi.responses import FileResponse
 from fastapi.staticfiles import StaticFiles
 from litellm import completion
 from pydantic import ValidationError
+from sqlalchemy import delete
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
 
@@ -182,12 +184,23 @@ async def get_reading_progress(
 ):
     query = await db.execute(
         select(models.ReadingProgress).where(
-            models.ReadingProgress.document_id == document_id
-            and models.ReadingProgress.chapter_id == chapter_id
+            (models.ReadingProgress.document_id == document_id) &
+            (models.ReadingProgress.chapter_id == chapter_id)
         )
     )
     reading_progress = query.scalar()
     return reading_progress
+
+
+@app.delete("/api/documents/{document_id}/reading_progress")
+async def delete_reading_progress(
+    document_id: int,
+    db: AsyncSession = Depends(database.get_db),
+):
+    query = delete(models.ReadingProgress).where(models.ReadingProgress.document_id == document_id)
+    await db.execute(query)
+    await db.commit()
+    return Response(status_code=status.HTTP_204_NO_CONTENT)
 
 
 @app.put("/api/reading_progress", response_model=schema.ReadingProgress)
